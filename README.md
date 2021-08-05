@@ -110,7 +110,7 @@ plot(artmap, .data = trainCirSquare$x, classes = trainCirSquare$classes) # creat
 ``` r
 p <- predict(artmap, .data = testCirSquare$x, simpleTargets = testCirSquare$classes)
 sum(p$matched)/length(p$matched) * 100 # percent correct
-#> [1] 98.2
+#> [1] 98.7
 ```
 
 The user can also implement the standard fuzzy ARTMAP<sup>2</sup>. In
@@ -137,7 +137,7 @@ plot(artmap, .data = trainCirSquare$x, classes = trainCirSquare$dummyClasses, du
 ``` r
 p <- predict(artmap, .data = testCirSquare$x, standardTargets = testCirSquare$dummyClasses)
 sum(p$matched, na.rm = T)/length(p$matched) * 100 # percent correct
-#> [1] 97.5
+#> [1] 97.9
 ```
 
 The standard ARTMAP is better suited for regression
@@ -207,8 +207,9 @@ plot(topoart, id = 1, noisySmiley) # the ART b module
 
 ### Hypersphere ART
 
-In all of the above examples, the user can substitute the fuzzy rule
-with the hypersphere rule<sup>1</sup>. The advantages of using the
+You can substitute the fuzzy rule with the hypersphere rule<sup>1</sup>
+for the unsupervised learning. For supervised learning (i.e. ARTMAP),
+only the simplified version is available. The advantages of using the
 hypersphere rule are: 1) it does not require complement coding, and 2)
 it does not require normalization<sup>1</sup>.
 
