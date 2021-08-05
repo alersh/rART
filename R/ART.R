@@ -90,12 +90,13 @@ train.TopoART <- function(network, .data){
 #' @description The ARTMAP training method
 #' @param network An ARTMAP object
 #' @param .data The data used for training.
-#' @param classLabels The classes for each data point. They are numeric values.
-#' @param dummyClasses The classes for each data point. These are dummy codes for the labels and must be binary.
-#' @param simplified Logical. Whether to use the simplified ART network. Default is FALSE.
+#' @param simpleTargets A vector. The target labels for all data point. They must be numeric values. Use this when running the simple ARTMAP.
+#' @param standardTargets A matrix. The target labels for all data point. Values must be between 0 and 1. The target labels must be converted 
+#' to dummy codes (binary codes) before passing into this argument. Continuous values can be used as long as they are between 0 and 1. 
+#' Use this when running the standard ARTMAP.
 #' @export
-train.ARTMAP <- function(network, .data, classLabels = NULL, dummyClasses = NULL){
-  .trainARTMAP(network, .data, classLabels, dummyClasses)
+train.ARTMAP <- function(network, .data, simpleTargets = NULL, standardTargets = NULL){
+  .trainARTMAP(network, .data, simpleTargets, standardTargets)
 }
 
 #' ART Prediction
@@ -124,11 +125,11 @@ predict.TopoART <- function(network, id, .data){
 #' @description The ARTMAP prediction/classification method
 #' @param network An ARTMAP object
 #' @param .data The data used for training. The data must be normalized between 0 and 1.
-#' @param classLabels The classes for each data point. They mustx be numeric values.
-#' @param dummyClasses The classes for each data point. These are dummy codes for the labels and must be binary.
+#' @param simpleTargets A vector. The target labels for all data point. They must be numeric values. Use this when running the simple ARTMAP.
+#' @param standardTargets A matrix. The target labels for all data point. Values must be between 0 and 1. The target labels must be converted 
 #' @return Returns a list containing three items: 1. categories - the mapfield categories predicted, 2. category_a - the F2 categories predicted, and 3. matched - whether the mapfield categories predicted match the actual values.
 #' @export
-predict.ARTMAP <- function(network, .data, classLabels = NULL, dummyClasses = NULL){
+predict.ARTMAP <- function(network, .data, simpleTargets = NULL, standardTargets = NULL){
   if (!is.matrix(.data)){
     .data <- tryCatch(
       as.matrix(.data),
@@ -143,14 +144,14 @@ predict.ARTMAP <- function(network, .data, classLabels = NULL, dummyClasses = NU
   }
 
   test <- FALSE
-  if (!is.null(dummyClasses) || !is.null(classLabels)){
+  if (!is.null(standardTargets) || !is.null(simpleTargets)){
     test <- TRUE
   }
 
-  if (!is.null(classLabels) && !is.numeric(classLabels)){
-    classLabels <- as.numeric(classLabels)
+  if (!is.null(simpleTargets) && !is.numeric(simpleTargets)){
+    simpleTargets <- as.numeric(simpleTargets)
   }
-  .predictARTMAP(network, .data, classLabels, dummyClasses, test)
+  .predictARTMAP(network, .data, simpleTargets, standardTargets, test)
 }
 
 #' Get the Learning Rule

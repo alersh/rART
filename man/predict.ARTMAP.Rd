@@ -4,16 +4,16 @@
 \alias{predict.ARTMAP}
 \title{ARTMAP Prediction}
 \usage{
-\method{predict}{ARTMAP}(network, .data, classLabels = NULL, dummyClasses = NULL)
+\method{predict}{ARTMAP}(network, .data, simpleTargets = NULL, standardTargets = NULL)
 }
 \arguments{
 \item{network}{An ARTMAP object}
 
 \item{.data}{The data used for training. The data must be normalized between 0 and 1.}
 
-\item{classLabels}{The classes for each data point. They mustx be numeric values.}
+\item{simpleTargets}{A vector. The target labels for all data point. They must be numeric values. Use this when running the simple ARTMAP.}
 
-\item{dummyClasses}{The classes for each data point. These are dummy codes for the labels and must be binary.}
+\item{standardTargets}{A matrix. The target labels for all data point. Values must be between 0 and 1. The target labels must be converted}
 }
 \value{
 Returns a list containing three items: 1. categories - the mapfield categories predicted, 2. category_a - the F2 categories predicted, and 3. matched - whether the mapfield categories predicted match the actual values.
