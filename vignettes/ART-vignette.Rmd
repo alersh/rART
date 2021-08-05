@@ -135,7 +135,7 @@ plot(topoart, id = 0, noisySmiley) # the ART a module
 plot(topoart, id = 1, noisySmiley) # the ART b module
 ```
 
-## Hypersphere ARTs
+### Hypersphere ART
 
 In all of the above examples, the user can substitute the fuzzy rule with the hypersphere rule^1^. The advantages of using the hypersphere rule are: 1) it does not require complement coding, and 2) it does not require normalization^1^.
 
