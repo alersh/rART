@@ -144,12 +144,12 @@ I hope you will find this package useful. If you discover any problem, please co
 
 ## References
 
-1. Anagnostopoulos, GC, Georgiopoulos, M. (2000) "Hypersphere ART and ARTMAP Unsupervised and Supervised, Incremental Learning", Proceedings of the IEEE-INNS-ENNS International Joint Conference on Neural Networks. Neural Computing: New Challenges and Perspectives for the New Millennium, 6.
+1. Anagnostopoulos, GC, Georgiopoulos, M. (2000) "Hypersphere ART and ARTMAP unsupervised and supervised, incremental learning", Proceedings of the IEEE-INNS-ENNS International Joint Conference on Neural Networks. Neural Computing: New Challenges and Perspectives for the New Millennium, 6.
 
 2. Carpenter, GA, Grossberg, S, Markuzon, N, Reynolds, JH, Rosen, DB. (1992) "Fuzzy ARTMAP: A neural network architecture for incremental supervised learning of analog multidimensional maps", IEEE Transactions on Neural Networks, 3(5), pp. 698-713.
 
 3. Carpenter, GA, Grossberg, S, Rosen DB. (1991) "Fuzzy ART: Fast stable learning and categorization of analog patterns by an adaptive resonance system", Neural Networks, 4(6), pp 759-771.
 
-4. da Silva, L.E.B, Elnabarawy, I., and Wunsch II, D.C. (2019) A Survey of Adaptive Resonance Theory Neural Network Models for Engineering Applications. Neural Networks, vol 120, pp 167 - 203.
+4. da Silva, L.E.B, Elnabarawy, I., and Wunsch II, D.C. (2019) "A survey of Adaptive Resonance Theory neural network models for engineering applications", Neural Networks, 120, pp 167 - 203.
 
 5. Tscherepanow, M. (2010) "TopoART: A topology learning hierarchical ART network", Proceedings of the International Conference on Artificial Neural Networks (ICANN). LNCS, 6354, pp. 157–167.

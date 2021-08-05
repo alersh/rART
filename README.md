@@ -110,7 +110,7 @@ plot(artmap, .data = trainCirSquare$x, classes = trainCirSquare$classes) # creat
 ``` r
 p <- predict(artmap, .data = testCirSquare$x, simpleTargets = testCirSquare$classes)
 sum(p$matched)/length(p$matched) * 100 # percent correct
-#> [1] 98.4
+#> [1] 98.2
 ```
 
 The user can also implement the standard fuzzy ARTMAP<sup>2</sup>. In
@@ -137,7 +137,7 @@ plot(artmap, .data = trainCirSquare$x, classes = trainCirSquare$dummyClasses, du
 ``` r
 p <- predict(artmap, .data = testCirSquare$x, standardTargets = testCirSquare$dummyClasses)
 sum(p$matched, na.rm = T)/length(p$matched) * 100 # percent correct
-#> [1] 97.1
+#> [1] 97.5
 ```
 
 The standard ARTMAP is better suited for regression
@@ -221,7 +221,7 @@ of the problem.
 ## References
 
 1.  Anagnostopoulos, GC, Georgiopoulos, M. (2000) “Hypersphere ART and
-    ARTMAP Unsupervised and Supervised, Incremental Learning”,
+    ARTMAP unsupervised and supervised, incremental learning”,
     Proceedings of the IEEE-INNS-ENNS International Joint Conference on
     Neural Networks. Neural Computing: New Challenges and Perspectives
     for the New Millennium, 6.
@@ -235,9 +235,9 @@ of the problem.
     stable learning and categorization of analog patterns by an adaptive
     resonance system”, Neural Networks, 4(6), pp 759-771.
 
-4.  da Silva, L.E.B, Elnabarawy, I., and Wunsch II, D.C. (2019) A Survey
-    of Adaptive Resonance Theory Neural Network Models for Engineering
-    Applications. Neural Networks, vol 120, pp 167 - 203.
+4.  da Silva, L.E.B, Elnabarawy, I., and Wunsch II, D.C. (2019) “A
+    survey of Adaptive Resonance Theory neural network models for
+    engineering applications”, Neural Networks, 120, pp 167 - 203.
 
 5.  Tscherepanow, M. (2010) “TopoART: A topology learning hierarchical
     ART network”, Proceedings of the International Conference on
