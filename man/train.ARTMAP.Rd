@@ -4,18 +4,16 @@
 \alias{train.ARTMAP}
 \title{Train an ARTMAP Network}
 \usage{
-\method{train}{ARTMAP}(network, .data, simpleTargets = NULL, standardTargets = NULL)
+\method{train}{ARTMAP}(network, .data, target)
 }
 \arguments{
 \item{network}{An ARTMAP object}
 
 \item{.data}{The data used for training.}
 
-\item{simpleTargets}{A vector. The target labels for all data point. They must be numeric values. Use this when running the simple ARTMAP.}
-
-\item{standardTargets}{A matrix. The target labels for all data point. Values must be between 0 and 1. The target labels must be converted 
-to dummy codes (binary codes) before passing into this argument. Continuous values can be used as long as they are between 0 and 1. 
-Use this when running the standard ARTMAP.}
+\item{target}{Either a numeric vector or a matrix. Use the vector form when running the simplified ARTMAP classification. Use the matrix 
+form when running the standard ARTMAP classification where the target labels must be binary values. For regression which requires the 
+standard ARTMAP, either a vector or a matrix (single column) of continuous values (normalized between 0 and 1) can be used.}
 }
 \description{
 The ARTMAP training method

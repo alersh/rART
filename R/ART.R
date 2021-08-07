@@ -90,13 +90,31 @@ train.TopoART <- function(network, .data){
 #' @description The ARTMAP training method
 #' @param network An ARTMAP object
 #' @param .data The data used for training.
-#' @param simpleTargets A vector. The target labels for all data point. They must be numeric values. Use this when running the simple ARTMAP.
-#' @param standardTargets A matrix. The target labels for all data point. Values must be between 0 and 1. The target labels must be converted 
-#' to dummy codes (binary codes) before passing into this argument. Continuous values can be used as long as they are between 0 and 1. 
-#' Use this when running the standard ARTMAP.
+#' @param target Either a numeric vector or a matrix. Use the vector form when running the simplified ARTMAP classification. Use the matrix 
+#' form when running the standard ARTMAP classification where the target labels must be binary values. For regression which requires the 
+#' standard ARTMAP, either a vector or a matrix (single column) of continuous values (normalized between 0 and 1) can be used.
 #' @export
-train.ARTMAP <- function(network, .data, simpleTargets = NULL, standardTargets = NULL){
-  .trainARTMAP(network, .data, simpleTargets, standardTargets)
+train.ARTMAP <- function(network, .data, target){
+  if (missing(target)){
+    stop("The target is missing.")
+  }
+  if (!is.vector(target) && !is.matrix(target)){
+    stop("The target must be either a vector or a matrix.")
+  }
+  if (!isSimplified(network)){
+    if (!is.matrix(target))
+      target <- as.matrix(target)
+  } else{
+    if (!is.vector(target)){
+      stop("The simplified ARTMAP requires a vector for the target.")
+    }
+  }
+  if (is.vector(target)){
+    .trainARTMAP(network, .data, vTarget = target)
+  } else{
+    # it is a matrix
+    .trainARTMAP(network, .data, mTarget = target)
+  }
 }
 
 #' ART Prediction
@@ -125,33 +143,42 @@ predict.TopoART <- function(network, id, .data){
 #' @description The ARTMAP prediction/classification method
 #' @param network An ARTMAP object
 #' @param .data The data used for training. The data must be normalized between 0 and 1.
-#' @param simpleTargets A vector. The target labels for all data point. They must be numeric values. Use this when running the simple ARTMAP.
-#' @param standardTargets A matrix. The target labels for all data point. Values must be between 0 and 1. The target labels must be converted 
+#' @param target Either a numeric vector, a matrix, or NULL. Use the vector form when running the simplified ARTMAP classification. Use the matrix 
+#' form when running the standard ARTMAP classification where the target labels must be binary values. For regression which requires the 
+#' standard ARTMAP, either a vector or a matrix (single column) of continuous values (normalized between 0 and 1) can be used. If it is NULL, then
+#' only the predictions are done.
 #' @return Returns a list containing three items: 1. categories - the mapfield categories predicted, 2. category_a - the F2 categories predicted, and 3. matched - whether the mapfield categories predicted match the actual values.
 #' @export
-predict.ARTMAP <- function(network, .data, simpleTargets = NULL, standardTargets = NULL){
+predict.ARTMAP <- function(network, .data, target = NULL){
+  
   if (!is.matrix(.data)){
-    .data <- tryCatch(
-      as.matrix(.data),
-      error = function(e){
-        e
-      }
-    )
+    .data <- as.matrix(.data)
   }
-
-  if (inherits(.data, "error")){
-    stop(.data$message)
-  }
-
+  
+  p <- NULL
   test <- FALSE
-  if (!is.null(standardTargets) || !is.null(simpleTargets)){
+  if (!is.null(target)){
+    
+    if (!is.vector(target) && !is.matrix(target)){
+      stop("The target must be either a vector or a matrix.")
+    }
+    
     test <- TRUE
+    if (!isSimplified(network)){
+      if (!is.matrix(target))
+        target <- as.matrix(target)
+      p <- .predictARTMAP(network, .data, mTarget = target, test = test)
+    } else{
+      if (!is.vector(target)){
+        stop("The simplified ARTMAP requires a vector for the target.")
+      }
+      p <- .predictARTMAP(network, .data, vTarget = target, test = test)
+    }
+  } else{
+    p <- .predictARTMAP(network, .data, test = test)
+    
   }
-
-  if (!is.null(simpleTargets) && !is.numeric(simpleTargets)){
-    simpleTargets <- as.numeric(simpleTargets)
-  }
-  .predictARTMAP(network, .data, simpleTargets, standardTargets, test)
+  return (p)
 }
 
 #' Get the Learning Rule

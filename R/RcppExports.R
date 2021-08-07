@@ -17,12 +17,12 @@
     .Call('_rART_newARTMAP', PACKAGE = 'rART', numFeatures, vigilance, learningRate, categorySize, maxEpochs, simplified)
 }
 
-.trainARTMAP <- function(net, x, labels = NULL, dummyLabels = NULL) {
-    invisible(.Call('_rART_trainARTMAP', PACKAGE = 'rART', net, x, labels, dummyLabels))
+.trainARTMAP <- function(net, x, vTarget = NULL, mTarget = NULL) {
+    invisible(.Call('_rART_trainARTMAP', PACKAGE = 'rART', net, x, vTarget, mTarget))
 }
 
-.predictARTMAP <- function(net, x, labels = NULL, dummyLabels = NULL, test = FALSE) {
-    .Call('_rART_predictARTMAP', PACKAGE = 'rART', net, x, labels, dummyLabels, test)
+.predictARTMAP <- function(net, x, vTarget = NULL, mTarget = NULL, test = FALSE) {
+    .Call('_rART_predictARTMAP', PACKAGE = 'rART', net, x, vTarget, mTarget, test)
 }
 
 .TopoART <- function(numFeatures, num = 2L, vigilance = 0.9, learningRate1 = 1.0, learningRate2 = 0.6, tau = 100L, phi = 6L, categorySize = 200L, maxEpochs = 20L) {

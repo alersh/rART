@@ -62,30 +62,30 @@ BEGIN_RCPP
 END_RCPP
 }
 // trainARTMAP
-void trainARTMAP(List net, NumericMatrix x, Nullable< NumericVector > labels, Nullable< NumericMatrix > dummyLabels);
-RcppExport SEXP _rART_trainARTMAP(SEXP netSEXP, SEXP xSEXP, SEXP labelsSEXP, SEXP dummyLabelsSEXP) {
+void trainARTMAP(List net, NumericMatrix x, Nullable< NumericVector > vTarget, Nullable< NumericMatrix > mTarget);
+RcppExport SEXP _rART_trainARTMAP(SEXP netSEXP, SEXP xSEXP, SEXP vTargetSEXP, SEXP mTargetSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< List >::type net(netSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
-    Rcpp::traits::input_parameter< Nullable< NumericVector > >::type labels(labelsSEXP);
-    Rcpp::traits::input_parameter< Nullable< NumericMatrix > >::type dummyLabels(dummyLabelsSEXP);
-    trainARTMAP(net, x, labels, dummyLabels);
+    Rcpp::traits::input_parameter< Nullable< NumericVector > >::type vTarget(vTargetSEXP);
+    Rcpp::traits::input_parameter< Nullable< NumericMatrix > >::type mTarget(mTargetSEXP);
+    trainARTMAP(net, x, vTarget, mTarget);
     return R_NilValue;
 END_RCPP
 }
 // predictARTMAP
-List predictARTMAP(List net, NumericMatrix x, Nullable< NumericVector > labels, Nullable< NumericMatrix > dummyLabels, bool test);
-RcppExport SEXP _rART_predictARTMAP(SEXP netSEXP, SEXP xSEXP, SEXP labelsSEXP, SEXP dummyLabelsSEXP, SEXP testSEXP) {
+List predictARTMAP(List net, NumericMatrix x, Nullable< NumericVector > vTarget, Nullable< NumericMatrix > mTarget, bool test);
+RcppExport SEXP _rART_predictARTMAP(SEXP netSEXP, SEXP xSEXP, SEXP vTargetSEXP, SEXP mTargetSEXP, SEXP testSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< List >::type net(netSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
-    Rcpp::traits::input_parameter< Nullable< NumericVector > >::type labels(labelsSEXP);
-    Rcpp::traits::input_parameter< Nullable< NumericMatrix > >::type dummyLabels(dummyLabelsSEXP);
+    Rcpp::traits::input_parameter< Nullable< NumericVector > >::type vTarget(vTargetSEXP);
+    Rcpp::traits::input_parameter< Nullable< NumericMatrix > >::type mTarget(mTargetSEXP);
     Rcpp::traits::input_parameter< bool >::type test(testSEXP);
-    rcpp_result_gen = Rcpp::wrap(predictARTMAP(net, x, labels, dummyLabels, test));
+    rcpp_result_gen = Rcpp::wrap(predictARTMAP(net, x, vTarget, mTarget, test));
     return rcpp_result_gen;
 END_RCPP
 }

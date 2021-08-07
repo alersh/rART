@@ -22,6 +22,7 @@ library(mlbench)
 
 rART is a package containing the implementations of various ART (Adaptive Resonance Theory) models. ART is a class of neural network model that can perform both unsupervised and supervised (called ARTMAP) clustering online. The package is mainly written in Rcpp.
 
+
 ## What is Adaptive Resonance Theory?
 
 Adaptive Resonance Theory (ART) is a neural network model developed by Stephen Grossberg. It is a neuro-cognitive model that attempts to explain how the brain learns and interacts with the stimuli in the environment. The main ART model consists of a winner-take-all system, with the ability to dynamically generate additional categories for capturing different patterns in the data^4^. These two properties help solve the stability-plasticity problem that plagues most machine learning algorithms: how to learn new patterns without erasing the learned memories.
@@ -34,11 +35,13 @@ ART also shows several advantages over other machine learning models. These incl
 
 For a comprehensive review of ART and its variants, please read da Silva et al., 2019 ^4^.
 
+
 ## The rART package
 
 The rART package currently provides the implementation of two types of ART architecture: the standard ART and topology-learning ART (TopoART). TopoART forms linkages between clusters to enable the learning of the topology from the data. Additionally, TopoART possesses a noise filtering mechanism that prevents overfitting.
 
 Currently, rART provides the fuzzy and hypersphere learning rules for both the standard and the topological versions. In the future, other learning rules and architectures will be added.
+
 
 ## Installation
 
@@ -47,6 +50,7 @@ rART is not available on CRAN yet, but you can install the latest development ve
 ```{r, eval = FALSE}
 remotes::install_github("alersh/rART")
 ```
+
 
 ## Usage
 
@@ -78,9 +82,9 @@ Here is a circle-in-a-square classification problem solved with the simplified F
 trainCirSquare <- mlbench.circle(n = 10000)
 testCirSquare <- mlbench.circle(n = 1000)
 artmap <- ARTMAP(rule = "fuzzy", dimension = 2, vigilance = 0.8)
-train(artmap, trainCirSquare$x, trainCirSquare$classes)
+train(artmap, trainCirSquare$x, as.numeric(trainCirSquare$classes))
 plot(artmap, .data = trainCirSquare$x, classes = trainCirSquare$classes) # create the 2 dimensional plot of the data and the weights
-p <- predict(artmap, .data = testCirSquare$x, simpleTargets = testCirSquare$classes)
+p <- predict(artmap, .data = testCirSquare$x, target = as.numeric(testCirSquare$classes))
 sum(p$matched)/length(p$matched) * 100 # percent correct
 ```
 
@@ -94,9 +98,9 @@ artmap <- ARTMAP(rule = "fuzzy", dimension = 2, vigilance = 0.9, simplified = FA
 dummyMap <- createDummyCodeMap(unique(trainCirSquare$classes))
 trainCirSquare$dummyClasses <- encodeLabel(trainCirSquare$classes, dummyMap)
 testCirSquare$dummyClasses <- encodeLabel(testCirSquare$classes, dummyMap)
-train(artmap, trainCirSquare$x, standardTargets = trainCirSquare$dummyClasses)
+train(artmap, trainCirSquare$x, trainCirSquare$dummyClasses)
 plot(artmap, .data = trainCirSquare$x, classes = trainCirSquare$dummyClasses, dummyCodeMap = dummyMap) # create the 2 dimensional plot of the data and the weights
-p <- predict(artmap, .data = testCirSquare$x, standardTargets = testCirSquare$dummyClasses)
+p <- predict(artmap, .data = testCirSquare$x, target = testCirSquare$dummyClasses)
 sum(p$matched, na.rm = T)/length(p$matched) * 100 # percent correct
 ```
 
@@ -110,7 +114,8 @@ s <- sample(nrow(fn)) # randomize rows
 s_train <- fn[s,]
 a <- ARTMAP(dimension = 1, simplified = FALSE)
 a$module$b$rho <- 0.95 # The degree of approximation is determined by the vigilance parameter in ART b.
-train(a, as.matrix(s_train[,1]), standardTargets = as.matrix(s_train[,2]))
+train(a, as.matrix(s_train[,1]), s_train[,2])
+# get the fit
 result <- predict(a, as.matrix(s_train[,1])) 
 z <- cbind(s_train[,1], result$predicted)
 ggplot(data.frame(x = z[,1],y = z[,2])) + geom_line(aes(x = x, y = y), color = "red") +
@@ -137,7 +142,8 @@ plot(topoart, id = 1, noisySmiley) # the ART b module
 
 ### Hypersphere ART
 
-In all of the above examples, the user can substitute the fuzzy rule with the hypersphere rule^1^. The advantages of using the hypersphere rule are: 1) it does not require complement coding, and 2) it does not require normalization^1^.
+You can substitute the fuzzy rule with the hypersphere rule^1^ for the unsupervised learning. For supervised learning (i.e. ARTMAP), only the simplified version is available. The advantages of using the hypersphere rule are: 1) it does not require complement coding, and 2) it does not require normalization^1^.
+
 
 ## Final Words
 
@@ -147,12 +153,12 @@ I hope you will find this package useful. If you discover any problem, please co
 
 ## References
 
-1. Anagnostopoulos, GC, Georgiopoulos, M. (2000) "Hypersphere ART and ARTMAP Unsupervised and Supervised, Incremental Learning", Proceedings of the IEEE-INNS-ENNS International Joint Conference on Neural Networks. Neural Computing: New Challenges and Perspectives for the New Millennium, 6.
+1. Anagnostopoulos, GC, Georgiopoulos, M. (2000) "Hypersphere ART and ARTMAP unsupervised and supervised, incremental learning", Proceedings of the IEEE-INNS-ENNS International Joint Conference on Neural Networks. Neural Computing: New Challenges and Perspectives for the New Millennium, 6.
 
 2. Carpenter, GA, Grossberg, S, Markuzon, N, Reynolds, JH, Rosen, DB. (1992) "Fuzzy ARTMAP: A neural network architecture for incremental supervised learning of analog multidimensional maps", IEEE Transactions on Neural Networks, 3(5), pp. 698-713.
 
 3. Carpenter, GA, Grossberg, S, Rosen DB. (1991) "Fuzzy ART: Fast stable learning and categorization of analog patterns by an adaptive resonance system", Neural Networks, 4(6), pp 759-771.
 
-4. da Silva, L.E.B, Elnabarawy, I., and Wunsch II, D.C. (2019) A Survey of Adaptive Resonance Theory Neural Network Models for Engineering Applications. Neural Networks, vol 120, pp 167 - 203.
+4. da Silva, L.E.B, Elnabarawy, I., and Wunsch II, D.C. (2019) "A survey of Adaptive Resonance Theory neural network models for engineering applications", Neural Networks, 120, pp 167 - 203.
 
 5. Tscherepanow, M. (2010) "TopoART: A topology learning hierarchical ART network", Proceedings of the International Conference on Artificial Neural Networks (ICANN). LNCS, 6354, pp. 157–167.

@@ -139,14 +139,14 @@ namespace Hypersphere {
 
   }
 
-  void trainARTMAP( List net, NumericMatrix x, Nullable< NumericVector > labels = R_NilValue, Nullable< NumericMatrix > dummyLabels = R_NilValue ){
+  void trainARTMAP( List net, NumericMatrix x, Nullable< NumericVector > vTarget = R_NilValue, Nullable< NumericMatrix > mTarget = R_NilValue ){
     if ( !isSimplified( net ) ){
       stop( "Only the simplified form is available for hypersphere learning." );
     }
 
     Hypersphere::initWeight( net, x );
     if ( isARTMAP( net ) ){
-      ARTMAP::train( net, x, labels, dummyLabels, sameCode, activation, match, weightUpdate, weightUpdate );
+      ARTMAP::train( net, x, vTarget, mTarget, sameCode, activation, match, weightUpdate, weightUpdate );
     }
 
   }
@@ -162,14 +162,14 @@ namespace Hypersphere {
     return results;
   }
 
-  List predictARTMAP( List net, NumericMatrix x, Nullable< NumericVector > labels, Nullable< NumericMatrix > dummyLabels = R_NilValue, bool test = false ){
+  List predictARTMAP( List net, NumericMatrix x, Nullable< NumericVector > vTarget, Nullable< NumericMatrix > mTarget = R_NilValue, bool test = false ){
     List results;
     if ( isARTMAP( net ) ){
       if ( !isSimplified( net ) ){
         // only the simplified form is available
         net.attr( "simplified" ) = true;
       }
-      results = ARTMAP::predict ( net, x, labels, dummyLabels, sameCode, sameCode, activation, match, test );
+      results = ARTMAP::predict ( net, x, vTarget, mTarget, sameCode, sameCode, activation, match, test );
     }
 
     return results;

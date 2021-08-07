@@ -490,8 +490,8 @@ namespace ARTMAP {
 
   void train( List net,
               NumericMatrix x,
-              Nullable<NumericVector> labels,
-              Nullable< NumericMatrix > dummyLabels,
+              Nullable<NumericVector> vTarget,
+              Nullable< NumericMatrix > mTarget,
               std::function< NumericVector( NumericVector ) > codeFun,
               std::function< double( List, NumericVector, NumericVector ) > activationFun,
               std::function< double( List, NumericVector, NumericVector ) > matchFun,
@@ -503,10 +503,10 @@ namespace ARTMAP {
     if ( !isARTMAP( net ) ){
       stop( "The network is not an ARTMAP." );
     }
-    if ( !dummyLabels.isNotNull() && !isSimplified( net ) ){
+    if ( !mTarget.isNotNull() && !isSimplified( net ) ){
        stop( "The labels are missing. End running." );
     }
-    else if ( !labels.isNotNull() && isSimplified( net ) ){
+    else if ( !vTarget.isNotNull() && isSimplified( net ) ){
       stop("The labels are missing. End running.");
     }
     for (int i = 1; i <= ep; i++){
@@ -515,9 +515,9 @@ namespace ARTMAP {
 
       for (int j = 0; j < nrow; j++){
         if ( isSimplified( net ) )
-          change += simplified::learn( net, codeFun( x( j, _ ) ), NumericVector ( labels )( j ), activationFun, matchFun, weightUpdateFun );
+          change += simplified::learn( net, codeFun( x( j, _ ) ), NumericVector ( vTarget )( j ), activationFun, matchFun, weightUpdateFun );
         else
-          change += standard::learn( net, codeFun( x( j, _ ) ), codeFun( NumericMatrix ( dummyLabels )( j, _ ) ), activationFun, matchFun, weightUpdateFun, mapfieldUpdateFun );
+          change += standard::learn( net, codeFun( x( j, _ ) ), codeFun( NumericMatrix ( mTarget )( j, _ ) ), activationFun, matchFun, weightUpdateFun, mapfieldUpdateFun );
       }
 
       cout << "Number of changes: " << change << endl;
@@ -536,8 +536,8 @@ namespace ARTMAP {
 
   List predict( List net,
                 NumericMatrix x,
-                Nullable< NumericVector > labels,
-                Nullable< NumericMatrix > dummyLabels,
+                Nullable< NumericVector > vTarget,
+                Nullable< NumericMatrix > mTarget,
                 std::function< NumericVector( NumericVector ) > codeFun,
                 std::function< NumericVector( NumericVector ) > uncodeFun,
                 std::function< double( List, NumericVector, NumericVector ) > activationFun,
@@ -557,7 +557,7 @@ namespace ARTMAP {
           category_a( i ) = result( "category_a" );
           predicted( i ) = result( "predicted" );
           if ( test ){
-            matched( i ) = simplified::test( predicted( i ), NumericVector( labels )( i ) );
+            matched( i ) = simplified::test( predicted( i ), NumericVector( vTarget )( i ) );
           }
 
       }
@@ -573,7 +573,7 @@ namespace ARTMAP {
         predicted( i, _ ) = uncodeFun( as<NumericVector>( result( "F1_b" ) ) );
         category_a( i ) = result( "category_a" );
         if ( test ){
-          matched( i ) = standard::test( net, codeFun( NumericMatrix ( dummyLabels )( i, _ ) ), activationFun, matchFun );
+          matched( i ) = standard::test( net, codeFun( NumericMatrix ( mTarget )( i, _ ) ), activationFun, matchFun );
         }
       }
 
@@ -608,26 +608,26 @@ List newARTMAP ( int numFeatures, double vigilance = 0.75, double learningRate =
 }
 
 // [[Rcpp::export(.trainARTMAP)]]
-void trainARTMAP ( List net, NumericMatrix x, Nullable< NumericVector > labels = R_NilValue, Nullable< NumericMatrix > dummyLabels = R_NilValue ){
+void trainARTMAP ( List net, NumericMatrix x, Nullable< NumericVector > vTarget = R_NilValue, Nullable< NumericMatrix > mTarget = R_NilValue ){
 
   if ( isFuzzy( net ) ){
-    Fuzzy::trainARTMAP( net, x, labels, dummyLabels );
+    Fuzzy::trainARTMAP( net, x, vTarget, mTarget );
   }
   if ( isHypersphere( net ) ){
-    Hypersphere::trainARTMAP( net, x, labels, dummyLabels );
+    Hypersphere::trainARTMAP( net, x, vTarget, mTarget );
   }
 
 }
 
 // [[Rcpp::export(.predictARTMAP)]]
-List predictARTMAP ( List net, NumericMatrix x, Nullable< NumericVector > labels = R_NilValue, Nullable< NumericMatrix > dummyLabels = R_NilValue, bool test = false ){
+List predictARTMAP ( List net, NumericMatrix x, Nullable< NumericVector > vTarget = R_NilValue, Nullable< NumericMatrix > mTarget = R_NilValue, bool test = false ){
 
   List results;
   if ( isFuzzy( net ) ){
-    results = Fuzzy::predictARTMAP( net, x, labels, dummyLabels, test );
+    results = Fuzzy::predictARTMAP( net, x, vTarget, mTarget, test );
   }
   if ( isHypersphere( net ) ){
-    results = Hypersphere::predictARTMAP( net, x, labels, dummyLabels, test );
+    results = Hypersphere::predictARTMAP( net, x, vTarget, mTarget, test );
   }
   return results;
 }

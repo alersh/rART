@@ -65,13 +65,13 @@ namespace Fuzzy {
 
   }
 
-  void trainARTMAP( List net, NumericMatrix x, Nullable< NumericVector > labels = R_NilValue, Nullable< NumericMatrix > dummyLabels = R_NilValue ){
+  void trainARTMAP( List net, NumericMatrix x, Nullable< NumericVector > vTarget = R_NilValue, Nullable< NumericMatrix > mTarget = R_NilValue ){
     int numModules = as<int>( net["numModules"] );
     for ( int i = 0; i < numModules; i++ ){
       initWeight( as<List>( net["module"] )[i], true );
     }
     if ( isARTMAP( net ) ){
-      ARTMAP::train( net, x, labels, dummyLabels, complementCode, activation, match, weightUpdate, weightUpdate );
+      ARTMAP::train( net, x, vTarget, mTarget, complementCode, activation, match, weightUpdate, weightUpdate );
     }
 
   }
@@ -87,10 +87,10 @@ namespace Fuzzy {
     return results;
   }
 
-  List predictARTMAP( List net, NumericMatrix x, Nullable< NumericVector > labels, Nullable< NumericMatrix > dummyLabels = R_NilValue, bool test = false ){
+  List predictARTMAP( List net, NumericMatrix x, Nullable< NumericVector > vTarget, Nullable< NumericMatrix > mTarget = R_NilValue, bool test = false ){
     List results;
     if ( isARTMAP( net ) ){
-      results = ARTMAP::predict ( net, x, labels, dummyLabels, complementCode, uncomplementCode, activation, match, test );
+      results = ARTMAP::predict ( net, x, vTarget, mTarget, complementCode, uncomplementCode, activation, match, test );
     }
     return results;
   }

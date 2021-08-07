@@ -101,16 +101,16 @@ simplified Fuzzy ARTMAP:
 trainCirSquare <- mlbench.circle(n = 10000)
 testCirSquare <- mlbench.circle(n = 1000)
 artmap <- ARTMAP(rule = "fuzzy", dimension = 2, vigilance = 0.8)
-train(artmap, trainCirSquare$x, trainCirSquare$classes)
+train(artmap, trainCirSquare$x, as.numeric(trainCirSquare$classes))
 plot(artmap, .data = trainCirSquare$x, classes = trainCirSquare$classes) # create the 2 dimensional plot of the data and the weights
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
 ``` r
-p <- predict(artmap, .data = testCirSquare$x, simpleTargets = testCirSquare$classes)
+p <- predict(artmap, .data = testCirSquare$x, target = as.numeric(testCirSquare$classes))
 sum(p$matched)/length(p$matched) * 100 # percent correct
-#> [1] 98.7
+#> [1] 98.4
 ```
 
 The user can also implement the standard fuzzy ARTMAP<sup>2</sup>. In
@@ -128,16 +128,16 @@ artmap <- ARTMAP(rule = "fuzzy", dimension = 2, vigilance = 0.9, simplified = FA
 dummyMap <- createDummyCodeMap(unique(trainCirSquare$classes))
 trainCirSquare$dummyClasses <- encodeLabel(trainCirSquare$classes, dummyMap)
 testCirSquare$dummyClasses <- encodeLabel(testCirSquare$classes, dummyMap)
-train(artmap, trainCirSquare$x, standardTargets = trainCirSquare$dummyClasses)
+train(artmap, trainCirSquare$x, trainCirSquare$dummyClasses)
 plot(artmap, .data = trainCirSquare$x, classes = trainCirSquare$dummyClasses, dummyCodeMap = dummyMap) # create the 2 dimensional plot of the data and the weights
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
 ``` r
-p <- predict(artmap, .data = testCirSquare$x, standardTargets = testCirSquare$dummyClasses)
+p <- predict(artmap, .data = testCirSquare$x, target = testCirSquare$dummyClasses)
 sum(p$matched, na.rm = T)/length(p$matched) * 100 # percent correct
-#> [1] 97.9
+#> [1] 96.8
 ```
 
 The standard ARTMAP is better suited for regression
@@ -152,7 +152,7 @@ s <- sample(nrow(fn)) # randomize rows
 s_train <- fn[s,]
 a <- ARTMAP(dimension = 1, simplified = FALSE)
 a$module$b$rho <- 0.95 # The degree of approximation is determined by the vigilance parameter in ART b.
-train(a, as.matrix(s_train[,1]), standardTargets = as.matrix(s_train[,2]))
+train(a, as.matrix(s_train[,1]), s_train[,2])
 # get the fit
 result <- predict(a, as.matrix(s_train[,1])) 
 z <- cbind(s_train[,1], result$predicted)

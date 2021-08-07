@@ -60,8 +60,8 @@ namespace ARTMAP{
 
   void train( List net,
               NumericMatrix x,
-              Nullable< NumericVector > labels,
-              Nullable< NumericMatrix > dummyLabels,
+              Nullable< NumericVector > vTarget,
+              Nullable< NumericMatrix > mTarget,
               std::function< NumericVector( NumericVector ) > codeFun,
               std::function< double( List, NumericVector, NumericVector ) > activationFun,
               std::function< double( List, NumericVector, NumericVector ) > matchFun,
@@ -70,16 +70,16 @@ namespace ARTMAP{
 
  List predict( List net,
                NumericMatrix x,
-               Nullable< NumericVector > labels,
-               Nullable< NumericMatrix > dummyLabels,
+               Nullable< NumericVector > vTarget,
+               Nullable< NumericMatrix > mTarget,
                std::function< NumericVector( NumericVector ) > codeFun,
                std::function< NumericVector( NumericVector ) > uncodeFun,
                std::function< double( List, NumericVector, NumericVector ) > activationFun,
                std::function< double( List, NumericVector, NumericVector ) > matchFun,
                bool test = false );
 }
-void trainARTMAP ( List net, NumericMatrix x, Nullable< NumericVector > labels = R_NilValue, Nullable< NumericMatrix > dummyLabels = R_NilValue );
+void trainARTMAP ( List net, NumericMatrix x, Nullable< NumericVector > vTarget = R_NilValue, Nullable< NumericMatrix > mTarget = R_NilValue );
 
-List predictARTMAP ( List net, NumericMatrix x, Nullable< NumericVector > labels = R_NilValue, Nullable< NumericMatrix > dummyLabels = R_NilValue, bool test = false );
+List predictARTMAP ( List net, NumericMatrix x, Nullable< NumericVector > vTarget = R_NilValue, Nullable< NumericMatrix > mTarget = R_NilValue, bool test = false );
 
 
