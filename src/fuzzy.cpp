@@ -32,7 +32,7 @@ bool isFuzzy ( List net ){
 namespace Fuzzy {
 
   double activation( List module, NumericVector x, NumericVector w ){
-    return sum( pmin( x, w ) )/( as<double>( module["alpha"] ) + sum( na_omit( w ) ) );
+    return sum( na_omit( pmin( x, w ) ) )/( as<double>( module["alpha"] ) + sum( na_omit( w ) ) );
   }
 
   double TopoPredictActivation ( List module, NumericVector x, NumericVector w ){
