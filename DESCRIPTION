@@ -19,7 +19,7 @@ LazyData: true
 Suggests: 
     knitr,
     rmarkdown,
-    xml2
+    mlbench
 VignetteBuilder: knitr
 RoxygenNote: 7.1.1
 SystemRequirements: C++11
