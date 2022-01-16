@@ -25,12 +25,12 @@ bool isSimplified( List net ){
 
 namespace ARTMAP {
   // create and return a mapfield module
-  List mapfield ( int id, int numFeatures, double vigilance = 0.75, double learningRate = 1.0, bool simplified = false ){
+  List mapfield ( int id, int dimension, double vigilance = 0.75, double learningRate = 1.0, bool simplified = false ){
     List module;
     NumericMatrix w;
     if ( !simplified ){
       module = List::create( _["id"] = id,                   // number of category to create when the module runs out of categories to match
-                             _["numFeatures"] = numFeatures, // number of features
+                             _["dimension"] = dimension,     // number of features
                              _["a_size"] = 0,                // number of categories from ART a
                              _["b_size"] = 0,                // number of categories from ART b
                              _["epsilon"] = 0.000001,        // match function parameter
@@ -42,7 +42,7 @@ namespace ARTMAP {
     }
     else{
       module = List::create( _["id"] = id,                   // number of category to create when the module runs out of categories to match
-                             _["numFeatures"] = numFeatures, // number of features
+                             _["dimension"] = dimension,     // number of features
                              _["numMapfield"] = 0,           // number of categories in the mapfield
                              _["w"] = w,                     // map field weights
                              _["rho"] = vigilance,           // vigilance parameter
@@ -589,18 +589,34 @@ namespace ARTMAP {
 
 
 // [[Rcpp::export(.ARTMAP)]]
-List newARTMAP ( int numFeatures, double vigilance = 0.75, double learningRate = 1.0, int categorySize = 100, int maxEpochs = 20, bool simplified = false ){
+List newARTMAP ( int dimension, double vigilance = 0.75, double learningRate = 1.0, int categorySize = 100, int maxEpochs = 20, bool simplified = false ){
+  if ( vigilance < 0.0 || vigilance > 1.0 ){
+    stop( "The vigilance value must be between 0 and 1.0." );
+  }
+  if ( learningRate < 0.0 || learningRate > 1.0 ){
+    stop( "The learningRate value must be between 0 and 1.0." );
+  }
+  if ( categorySize < 1 ){
+    stop( "The categorySize value must be greater than 0." );
+  }
+  if ( maxEpochs < 1 ){
+    stop( "The maxEpochs value must be greater than 0." );
+  }
+  if ( dimension < 1 ){
+    stop( "The dimension value must be greater than 0." );
+  }
+  
   List net;
   List mapfield;
   if ( !simplified ){
-    net = newART( numFeatures, 2, vigilance, learningRate, categorySize, maxEpochs );
+    net = newART( dimension, 2, vigilance, learningRate, categorySize, maxEpochs );
     as<List>( net["module"] ).attr( "names" ) = CharacterVector::create( "a", "b" );
   }
   else{
-    net = newART( numFeatures, 1, vigilance, learningRate, categorySize, maxEpochs );
+    net = newART( dimension, 1, vigilance, learningRate, categorySize, maxEpochs );
     as<List>( net["module"] ).attr( "names" ) = CharacterVector::create( "a" );
   }
-  mapfield.push_back( ARTMAP::mapfield( 0, numFeatures, vigilance, learningRate, simplified ), "ab" );
+  mapfield.push_back( ARTMAP::mapfield( 0, dimension, vigilance, learningRate, simplified ), "ab" );
   net.push_back( mapfield, "mapfield" );
   net.attr( "class" ) = "ARTMAP";
   net.attr( "simplified" ) = simplified;

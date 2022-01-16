@@ -16,13 +16,13 @@ using namespace std;
 
 namespace ART {
 
-  List module ( int id, int numFeatures, double vigilance = 0.75, double learningRate = 1.0, int categorySize = 100 ){
+  List module ( int id, int dimension, double vigilance = 0.75, double learningRate = 1.0, int categorySize = 100 ){
     NumericMatrix w;
     NumericVector stm;
     List module = List::create( _["id"] = id,                   // module id
                                 _["capacity"] = categorySize,   // number of category to create when the module runs out of categories to match
                                 _["numCategories"] = 0,         // number of categories created during learning
-                                _["numFeatures"] = numFeatures, // number of features/dimensions in the data
+                                _["dimension"] = dimension,     // number of features/dimensions in the data
                                 _["alpha"] = 0.001,             // activation function parameter
                                 _["epsilon"] = 0.000001,        // match function parameter
                                 _["w"] = w,                     // top-down weights
@@ -265,7 +265,26 @@ List predictART ( List net, int id, NumericMatrix x ){
 }
 
 // [[Rcpp::export(.ART)]]
-List newART ( int numFeatures, int num = 1, double vigilance = 0.75, double learningRate = 1.0, int categorySize = 100, int maxEpochs = 20 ){
+List newART ( int dimension, int num = 1, double vigilance = 0.75, double learningRate = 1.0, int categorySize = 100, int maxEpochs = 20 ){
+  if ( vigilance < 0.0 || vigilance > 1.0 ){
+    stop( "The vigilance value must be between 0 and 1.0." );
+  }
+  if ( learningRate < 0.0 || learningRate > 1.0 ){
+    stop( "The learningRate value must be between 0 and 1.0." );
+  }
+  if ( num < 1 ){
+    stop( "The num value must be greater than 0." );
+  }
+  if ( categorySize < 1 ){
+    stop( "The categorySize value must be greater than 0." );
+  }
+  if ( maxEpochs < 1 ){
+    stop( "The maxEpochs value must be greater than 0." );
+  }
+  if ( dimension < 1 ){
+    stop( "The dimension value must be greater than 0." );
+  }
+  
   List net = List::create( _["numModules"] = num,       // number of ART modules
                            _["epochs"] = 0,             // total number of epochs required to learn
                            _["maxEpochs"] = maxEpochs   // maximum number of epochs
@@ -273,7 +292,7 @@ List newART ( int numFeatures, int num = 1, double vigilance = 0.75, double lear
 
   List modules;
   for ( int i = 0; i < num; i++ ){
-    modules.push_back( ART::module( i, numFeatures, vigilance, learningRate, categorySize ) );
+    modules.push_back( ART::module( i, dimension, vigilance, learningRate, categorySize ) );
   }
 
   net.push_back( modules, "module" );

@@ -27,12 +27,12 @@ bool isTopoART ( List net ){
 
 namespace Topo {
 
-  List module( int id, int numFeatures, double vigilance, int phi, double learningRate1, double learningRate2, int categorySize = 200 ){
+  List module( int id, int dimension, double vigilance, int phi, double learningRate1, double learningRate2, int categorySize = 200 ){
     IntegerVector n;
     IntegerVector edge;
     List linkedClusters;
 
-    List module = ART::module( id, numFeatures, vigilance, learningRate1, categorySize );  // init with base module
+    List module = ART::module( id, dimension, vigilance, learningRate1, categorySize );  // init with base module
     module.push_back( edge, "edge" );                       // a nx2 matrix that keeps track of the F2 neurons that are linked together
     module.push_back( learningRate1, "beta1" );             // learning rate for the highest activated neuron
     module.push_back( learningRate2, "beta2" );             // learning rate for the second neuron with the second highest activation after the best matching neuron
@@ -443,7 +443,36 @@ namespace Topo {
 }
 
 // [[Rcpp::export(.TopoART)]]
-List TopoART ( int numFeatures, int num = 2, double vigilance = 0.9, double learningRate1 = 1.0, double learningRate2 = 0.6, int tau = 100, int phi = 6, int categorySize = 200, int maxEpochs = 20 ){
+List TopoART ( int dimension, int num = 2, double vigilance = 0.9, double learningRate1 = 1.0, double learningRate2 = 0.6, int tau = 100, int phi = 6, int categorySize = 200, int maxEpochs = 20 ){
+  if ( vigilance < 0.0 || vigilance > 1.0 ){
+    stop( "The vigilance value must be between 0 and 1.0." );
+  }
+  if ( learningRate1 < 0.0 || learningRate1 > 1.0 ){
+    stop( "The learningRate1 value must be between 0 and 1.0." );
+  }
+  if (learningRate2 < 0.0 || learningRate2 > 1.0){
+    stop( "The learningRate2 value must be between 0 and 1.0." );
+  }
+  if ( num < 2 ){
+    stop( "The num value must be at least 2." );
+  }
+  if ( tau < 0 ){
+    stop( "The tau value must be at least 0." );
+  }
+  if ( phi < 0 ){
+    stop( "The phi value must be at least 0." );
+  }
+  if ( categorySize < 1 ){
+    stop( "The categorySize value must be greater than 0." );
+  }
+  if ( maxEpochs < 1 ){
+    stop( "The maxEpochs value must be greater than 0." );
+  }
+  if ( dimension < 1 ){
+    stop( "The dimension value must be greater than 0." );
+  }
+  
+  
   List net = List::create( _["numModules"] = num,       // number of topoART modules
                            _["epochs"] = 0,             // total number of epochs required to learn
                            _["maxEpochs"] = maxEpochs,  // maximum number of epochs
@@ -451,7 +480,7 @@ List TopoART ( int numFeatures, int num = 2, double vigilance = 0.9, double lear
 
   List modules;
   for (int i = 0; i < num; i++){
-    modules.push_back( Topo::module( i, numFeatures, vigilance, phi, learningRate1, learningRate2, categorySize ) );
+    modules.push_back( Topo::module( i, dimension, vigilance, phi, learningRate1, learningRate2, categorySize ) );
   }
 
   net.push_back( modules, "module" );
