@@ -11,7 +11,7 @@ using namespace Rcpp;
 using namespace std;
 
 
-List newARTMAP ( int numFeatures, double vigilance = 0.75, double learningRate = 1.0, int categorySize = 200, int maxEpochs = 20, bool simplified = false );
+List newARTMAP ( int dimension, double vigilance = 0.75, double learningRate = 1.0, int categorySize = 200, int maxEpochs = 20, bool simplified = false );
 bool isARTMAP ( List net );
 bool isSimplified( List net );
 

@@ -9,12 +9,12 @@
     .Call('_rART_predictART', PACKAGE = 'rART', net, id, x)
 }
 
-.ART <- function(numFeatures, num = 1L, vigilance = 0.75, learningRate = 1.0, categorySize = 100L, maxEpochs = 20L) {
-    .Call('_rART_newART', PACKAGE = 'rART', numFeatures, num, vigilance, learningRate, categorySize, maxEpochs)
+.ART <- function(dimension, num = 1L, vigilance = 0.75, learningRate = 1.0, categorySize = 100L, maxEpochs = 20L) {
+    .Call('_rART_newART', PACKAGE = 'rART', dimension, num, vigilance, learningRate, categorySize, maxEpochs)
 }
 
-.ARTMAP <- function(numFeatures, vigilance = 0.75, learningRate = 1.0, categorySize = 100L, maxEpochs = 20L, simplified = FALSE) {
-    .Call('_rART_newARTMAP', PACKAGE = 'rART', numFeatures, vigilance, learningRate, categorySize, maxEpochs, simplified)
+.ARTMAP <- function(dimension, vigilance = 0.75, learningRate = 1.0, categorySize = 100L, maxEpochs = 20L, simplified = FALSE) {
+    .Call('_rART_newARTMAP', PACKAGE = 'rART', dimension, vigilance, learningRate, categorySize, maxEpochs, simplified)
 }
 
 .trainARTMAP <- function(net, x, vTarget = NULL, mTarget = NULL) {
@@ -25,8 +25,8 @@
     .Call('_rART_predictARTMAP', PACKAGE = 'rART', net, x, vTarget, mTarget, test)
 }
 
-.TopoART <- function(numFeatures, num = 2L, vigilance = 0.9, learningRate1 = 1.0, learningRate2 = 0.6, tau = 100L, phi = 6L, categorySize = 200L, maxEpochs = 20L) {
-    .Call('_rART_TopoART', PACKAGE = 'rART', numFeatures, num, vigilance, learningRate1, learningRate2, tau, phi, categorySize, maxEpochs)
+.TopoART <- function(dimension, num = 2L, vigilance = 0.9, learningRate1 = 1.0, learningRate2 = 0.6, tau = 100L, phi = 6L, categorySize = 200L, maxEpochs = 20L) {
+    .Call('_rART_TopoART', PACKAGE = 'rART', dimension, num, vigilance, learningRate1, learningRate2, tau, phi, categorySize, maxEpochs)
 }
 
 .topoTrain <- function(net, x, labels = NULL) {

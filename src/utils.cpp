@@ -89,7 +89,7 @@ NumericVector appendVector( NumericVector v1, NumericVector v2 ){
 // initComplementWeight: initialize weight and its complement
 void initWeight( List net, bool complement = false ){
   // initialize weight dimension
-  int dim = as<int>( net["numFeatures"] );
+  int dim = as<int>( net["dimension"] );
   if ( complement ){
     dim *= 2;
   }

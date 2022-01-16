@@ -47,7 +47,7 @@ namespace Hypersphere {
     for ( int i = 0; i < numModules; i++ ){
       List module = as<List>( net["module"] )[i];
       module.push_back( rbar, "R_bar" );
-      NumericMatrix w = no_init( module["capacity"], as<int>( module["numFeatures"] ) + 1 );
+      NumericMatrix w = no_init( module["capacity"], as<int>( module["dimension"] ) + 1 );
       module["w"] = w;
       as<List>( net["module"] )( i ) = module;
     }
@@ -60,9 +60,9 @@ namespace Hypersphere {
   }
 
   double activation( List module, NumericVector x, NumericVector w ){
-    int numFeatures = module["numFeatures"];
-    double R = w[numFeatures];
-    NumericVector m = w[Range( 0, numFeatures - 1 )];
+    int dimension = module["dimension"];
+    double R = w[dimension];
+    NumericVector m = w[Range( 0, dimension - 1 )];
     double R_bar = module["R_bar"];
     double maximum = max( na_omit( NumericVector::create( R, norm( x, m ) ) ) );
     double a = ( R_bar - maximum )/( R_bar - R + as<double>( module["alpha"] ) );
@@ -71,18 +71,18 @@ namespace Hypersphere {
   }
 
   double TopoPredictActivation ( List module, NumericVector x, NumericVector w ){
-    int numFeatures = module["numFeatures"];
-    double R = w[numFeatures];
-    NumericVector m = w[Range( 0, numFeatures - 1 )];
+    int dimension = module["dimension"];
+    double R = w[dimension];
+    NumericVector m = w[Range( 0, dimension - 1 )];
     double R_bar = module["R_bar"];
     double maximum = max( na_omit( NumericVector::create( norm( x, m ) - R, 0 ) ) );
     return 1 - maximum/( 2*R_bar );
   }
 
   double match( List module, NumericVector x, NumericVector w ){
-    int numFeatures = module["numFeatures"];
-    double R = w[numFeatures];
-    NumericVector m = w[Range( 0, numFeatures - 1 )];
+    int dimension = module["dimension"];
+    double R = w[dimension];
+    NumericVector m = w[Range( 0, dimension - 1 )];
     double R_bar = module["R_bar"];
     double maximum = max( na_omit( NumericVector::create( R, norm( x, m ) ) ) );
     return 1 - maximum/R_bar;
@@ -90,10 +90,10 @@ namespace Hypersphere {
 
   NumericVector weightUpdate( List module, NumericVector x, NumericVector w ){
 
-    int numFeatures = module["numFeatures"];
+    int dimension = module["dimension"];
     double b = module["beta"];
-    double R = w[numFeatures];
-    NumericVector m = w[Range( 0, numFeatures - 1 )];
+    double R = w[dimension];
+    NumericVector m = w[Range( 0, dimension - 1 )];
     double dis = norm( x, m );
     NumericVector mnew;
     if ( dis < 0.000001 ){

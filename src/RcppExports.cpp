@@ -30,34 +30,34 @@ BEGIN_RCPP
 END_RCPP
 }
 // newART
-List newART(int numFeatures, int num, double vigilance, double learningRate, int categorySize, int maxEpochs);
-RcppExport SEXP _rART_newART(SEXP numFeaturesSEXP, SEXP numSEXP, SEXP vigilanceSEXP, SEXP learningRateSEXP, SEXP categorySizeSEXP, SEXP maxEpochsSEXP) {
+List newART(int dimension, int num, double vigilance, double learningRate, int categorySize, int maxEpochs);
+RcppExport SEXP _rART_newART(SEXP dimensionSEXP, SEXP numSEXP, SEXP vigilanceSEXP, SEXP learningRateSEXP, SEXP categorySizeSEXP, SEXP maxEpochsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type numFeatures(numFeaturesSEXP);
+    Rcpp::traits::input_parameter< int >::type dimension(dimensionSEXP);
     Rcpp::traits::input_parameter< int >::type num(numSEXP);
     Rcpp::traits::input_parameter< double >::type vigilance(vigilanceSEXP);
     Rcpp::traits::input_parameter< double >::type learningRate(learningRateSEXP);
     Rcpp::traits::input_parameter< int >::type categorySize(categorySizeSEXP);
     Rcpp::traits::input_parameter< int >::type maxEpochs(maxEpochsSEXP);
-    rcpp_result_gen = Rcpp::wrap(newART(numFeatures, num, vigilance, learningRate, categorySize, maxEpochs));
+    rcpp_result_gen = Rcpp::wrap(newART(dimension, num, vigilance, learningRate, categorySize, maxEpochs));
     return rcpp_result_gen;
 END_RCPP
 }
 // newARTMAP
-List newARTMAP(int numFeatures, double vigilance, double learningRate, int categorySize, int maxEpochs, bool simplified);
-RcppExport SEXP _rART_newARTMAP(SEXP numFeaturesSEXP, SEXP vigilanceSEXP, SEXP learningRateSEXP, SEXP categorySizeSEXP, SEXP maxEpochsSEXP, SEXP simplifiedSEXP) {
+List newARTMAP(int dimension, double vigilance, double learningRate, int categorySize, int maxEpochs, bool simplified);
+RcppExport SEXP _rART_newARTMAP(SEXP dimensionSEXP, SEXP vigilanceSEXP, SEXP learningRateSEXP, SEXP categorySizeSEXP, SEXP maxEpochsSEXP, SEXP simplifiedSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type numFeatures(numFeaturesSEXP);
+    Rcpp::traits::input_parameter< int >::type dimension(dimensionSEXP);
     Rcpp::traits::input_parameter< double >::type vigilance(vigilanceSEXP);
     Rcpp::traits::input_parameter< double >::type learningRate(learningRateSEXP);
     Rcpp::traits::input_parameter< int >::type categorySize(categorySizeSEXP);
     Rcpp::traits::input_parameter< int >::type maxEpochs(maxEpochsSEXP);
     Rcpp::traits::input_parameter< bool >::type simplified(simplifiedSEXP);
-    rcpp_result_gen = Rcpp::wrap(newARTMAP(numFeatures, vigilance, learningRate, categorySize, maxEpochs, simplified));
+    rcpp_result_gen = Rcpp::wrap(newARTMAP(dimension, vigilance, learningRate, categorySize, maxEpochs, simplified));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -90,12 +90,12 @@ BEGIN_RCPP
 END_RCPP
 }
 // TopoART
-List TopoART(int numFeatures, int num, double vigilance, double learningRate1, double learningRate2, int tau, int phi, int categorySize, int maxEpochs);
-RcppExport SEXP _rART_TopoART(SEXP numFeaturesSEXP, SEXP numSEXP, SEXP vigilanceSEXP, SEXP learningRate1SEXP, SEXP learningRate2SEXP, SEXP tauSEXP, SEXP phiSEXP, SEXP categorySizeSEXP, SEXP maxEpochsSEXP) {
+List TopoART(int dimension, int num, double vigilance, double learningRate1, double learningRate2, int tau, int phi, int categorySize, int maxEpochs);
+RcppExport SEXP _rART_TopoART(SEXP dimensionSEXP, SEXP numSEXP, SEXP vigilanceSEXP, SEXP learningRate1SEXP, SEXP learningRate2SEXP, SEXP tauSEXP, SEXP phiSEXP, SEXP categorySizeSEXP, SEXP maxEpochsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type numFeatures(numFeaturesSEXP);
+    Rcpp::traits::input_parameter< int >::type dimension(dimensionSEXP);
     Rcpp::traits::input_parameter< int >::type num(numSEXP);
     Rcpp::traits::input_parameter< double >::type vigilance(vigilanceSEXP);
     Rcpp::traits::input_parameter< double >::type learningRate1(learningRate1SEXP);
@@ -104,7 +104,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type phi(phiSEXP);
     Rcpp::traits::input_parameter< int >::type categorySize(categorySizeSEXP);
     Rcpp::traits::input_parameter< int >::type maxEpochs(maxEpochsSEXP);
-    rcpp_result_gen = Rcpp::wrap(TopoART(numFeatures, num, vigilance, learningRate1, learningRate2, tau, phi, categorySize, maxEpochs));
+    rcpp_result_gen = Rcpp::wrap(TopoART(dimension, num, vigilance, learningRate1, learningRate2, tau, phi, categorySize, maxEpochs));
     return rcpp_result_gen;
 END_RCPP
 }

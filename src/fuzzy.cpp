@@ -36,7 +36,7 @@ namespace Fuzzy {
   }
 
   double TopoPredictActivation ( List module, NumericVector x, NumericVector w ){
-    double a = 1 - sum( na_omit( pmin( x, w ) - w ) )/as<int>( module["numFeatures"] );
+    double a = 1 - sum( na_omit( pmin( x, w ) - w ) )/as<int>( module["dimension"] );
     return a;
   }
 
