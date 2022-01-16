@@ -44,9 +44,9 @@ NumericVector vectorToMatrix( NumericVector v, int nrow, int ncol );
 List linkClusters( IntegerVector edges, IntegerVector nodes );
 
 // Convert all numeric labels to their dummy codes
-NumericMatrix encodeNumericLabel( NumericVector labels, NumericMatrix code );
+NumericMatrix encodeNumericLabel( NumericVector labels, List code );
 
 // Convert all string labels to their dummy codes
-NumericMatrix encodeStringLabel( StringVector labels, NumericMatrix code );
+NumericMatrix encodeStringLabel( StringVector labels, List code );
 
 void printVector( NumericVector v );
