@@ -4,10 +4,17 @@
 \alias{normalize}
 \title{Data Normalization}
 \usage{
-normalize(.data)
+normalize(.data, use = NULL)
 }
 \arguments{
 \item{.data}{A data object such as a data frame, a matrix , or an array.}
+
+\item{use}{A data object that contains the same columns as those in .data. This dataset is
+used to estimate the maximum and minimum values for normalizing .data. This is useful
+when normalizing a test set using the same scales as the training set. If this data object
+contains the attribute "ranges", then the minimum and maximum values from the "ranges"
+will be used for the normalization. Finally, if use is NULL, then the scales are estimated 
+directly from .data.}
 }
 \value{
 A normalized data object

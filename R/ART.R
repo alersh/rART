@@ -53,7 +53,7 @@ TopoART <- function(rule = c("fuzzy", "hypersphere"), dimension, vigilance = 0.7
 ARTMAP <- function(rule = c("fuzzy", "hypersphere"), dimension, vigilance = 0.7, learningRate = 1.0, maxEpochs = 10, simplified = TRUE){
   rule <- match.arg(rule)
 
-  artmap <- .ARTMAP(numFeatures = dimension, vigilance = vigilance, learningRate = learningRate, maxEpochs = maxEpochs, simplified = simplified)
+  artmap <- .ARTMAP(dimension = dimension, vigilance = vigilance, learningRate = learningRate, maxEpochs = maxEpochs, simplified = simplified)
 
   attr(artmap, "rule") <- rule
 
@@ -304,14 +304,43 @@ decode <- function(dummyClasses, dummyCode){
 #' Data Normalization
 #' @description Normalize each column of data to values between 0 and 1
 #' @param .data A data object such as a data frame, a matrix , or an array.
+#' @param use A data object that contains the same columns as those in .data. This dataset is
+#' used to estimate the maximum and minimum values for normalizing .data. This is useful
+#' when normalizing a test set using the same scales as the training set. If this data object
+#' contains the attribute "ranges", then the minimum and maximum values from the "ranges"
+#' will be used for the normalization. Finally, if use is NULL, then the scales are estimated 
+#' directly from .data.
 #' @return A normalized data object
 #' @export
-normalize <- function(.data){
-  for (n in seq_len(ncol(.data))){
-    cmax <- max(.data[, n], na.rm = T)
-    cmin <- min(.data[, n], na.rm = T)
-    .data[, n] <- (.data[, n] - cmin)/(cmax - cmin)
+normalize <- function(.data, use = NULL){
+  if (!is.null(use)){
+    if (any(!colnames(use) %in% colnames(.data))){
+      stop("Some of the columns in the .data object are not found in the use data object. Please make sure both of them contain 
+           the same columns.")
+    }
   }
+  
+  ranges <- array(dim = c(2, ncol(.data)))
+  rownames(ranges) <- c("min", "max")
+  for (n in seq_len(ncol(.data))){
+    cmax <- cmin <- NA
+    if (!is.null(use)){
+      r <- attr(use, "ranges")
+      if (!is.null(r)){
+        cmin <- r[1,n]
+        cmax <- r[2,n]
+      } else{
+        cmax <- max(use[, n], na.rm = T)
+        cmin <- min(use[, n], na.rm = T)
+      }
+    } else{
+      cmax <- max(.data[, n], na.rm = T)
+      cmin <- min(.data[, n], na.rm = T)
+    }
+    .data[, n] <- (.data[, n] - cmin)/(cmax - cmin)
+    ranges[, n] <- c(cmin, cmax)
+  }
+  attr(.data, "ranges") <- ranges
   return (.data)
 }
 
