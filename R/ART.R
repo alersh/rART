@@ -264,7 +264,7 @@ createDummyCodeMap <- function(classLabels){
 #' Label Encoding and Decoding
 #' @description Convert numeric code to binary dummy code
 #' @param classLabels A vector of class labels. They must be numeric.
-#' @param dummyCode A list of dummy codes created for the labels using the function dummyCode
+#' @param dummyCode A list of dummy codes created for the labels using the function createDummyCodeMap
 #' @return A matrix of binary values
 #' @rdname createDummyCodeMap
 #' @export
