@@ -7,6 +7,7 @@
 TopoART(
   rule = c("fuzzy", "hypersphere"),
   dimension,
+  numModules = 2,
   vigilance = 0.7,
   learningRate1 = 1,
   learningRate2 = 0.6,
@@ -19,6 +20,8 @@ TopoART(
 \item{rule}{The activation / match / lerning rule to use. The choices available are fuzzy and hypersphere.}
 
 \item{dimension}{The number of dimension/features in the data}
+
+\item{numModules}{The number of TopoART modules. The default is 2.}
 
 \item{vigilance}{The vigilance parameter. Must be between 0 and 1.}
 

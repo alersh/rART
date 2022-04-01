@@ -21,6 +21,7 @@ ART <- function(rule = c("fuzzy", "hypersphere"), dimension, vigilance = 0.7, le
 #' @description Create a new TopoART object
 #' @param rule The activation / match / lerning rule to use. The choices available are fuzzy and hypersphere.
 #' @param dimension The number of dimension/features in the data
+#' @param numModules The number of TopoART modules. The default is 2.
 #' @param vigilance The vigilance parameter. Must be between 0 and 1.
 #' @param learningRate1 The learning rate when this neuron has the highest activation. Must be between 0 and 1.
 #' @param learningRate2 The learning rate when this neuron has the second highest activation. Must be between 0 and 1.
@@ -29,11 +30,11 @@ ART <- function(rule = c("fuzzy", "hypersphere"), dimension, vigilance = 0.7, le
 #' @param maxEpochs The maximum number of epochs. Default is 20.
 #' @return TopoART returns a TopoART object.
 #' @export
-TopoART <- function(rule = c("fuzzy", "hypersphere"), dimension, vigilance = 0.7, learningRate1 = 1.0, learningRate2 = 0.6, tau = 100, phi = 6, maxEpochs = 20){
+TopoART <- function(rule = c("fuzzy", "hypersphere"), dimension, numModules = 2, vigilance = 0.7, learningRate1 = 1.0, learningRate2 = 0.6, tau = 100, phi = 6, maxEpochs = 20){
 
   rule <- match.arg(rule)
 
-  topoART <- .TopoART(dimension, 2, vigilance, learningRate1, learningRate2, tau, phi, maxEpochs = maxEpochs)
+  topoART <- .TopoART(dimension, numModules, vigilance, learningRate1, learningRate2, tau, phi, maxEpochs = maxEpochs)
 
   attr(topoART, "rule") <- rule
 
