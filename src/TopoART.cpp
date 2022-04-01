@@ -26,12 +26,23 @@ bool isTopoART ( List net ){
 }
 
 namespace Topo {
+  
+  double rho ( double rho, int moduleId ){
+    
+    for ( int i = 1; i <= moduleId; i++ ){
+      rho = 0.5*( rho + 1 );
+    }
+    
+    return rho;
+  }
 
   List module( int id, int dimension, double vigilance, int phi, double learningRate1, double learningRate2, int categorySize = 200 ){
     IntegerVector n;
     IntegerVector edge;
     List linkedClusters;
-
+    
+    vigilance = rho( vigilance, id );
+    
     List module = ART::module( id, dimension, vigilance, learningRate1, categorySize );  // init with base module
     module.push_back( edge, "edge" );                       // a nx2 matrix that keeps track of the F2 neurons that are linked together
     module.push_back( learningRate1, "beta1" );             // learning rate for the highest activated neuron
@@ -79,14 +90,6 @@ namespace Topo {
     net["numCategories"] = numCategories + 1;
   }
 
-  double rho ( List net, int moduleId ){
-    List module = as<List>( net["module"] )[ moduleId ];
-    if ( moduleId - 1 >= 0 ){
-      return 0.5*( as<double>( module["rho"] ) + 1 );
-    }
-    return as<double>( module["rho"] );
-  }
-
   IntegerVector link ( IntegerVector edge, int bm, int sbm ) {
 
     int s = edge.size();
@@ -124,7 +127,7 @@ namespace Topo {
     IntegerVector oldn = as<IntegerVector>( module["n"] );
     int l = oldn.size();
     int phi = as<int>( module["phi"] );
-
+  
     if ( l == 0 ){
       // no F2 categories
       return 0;
@@ -245,7 +248,7 @@ namespace Topo {
       NumericVector T_j = sortIndex( a );
       bool resonance = false;
       int j = 0;
-      double rho_a = rho( net, id );
+      double rho_a = as<double>( module["rho"] );
       NumericVector matchIndex; // temporarily holds the indices of the bm and sbm neurons
 
       while( !resonance ){
@@ -363,13 +366,15 @@ namespace Topo {
     }
 
     // subset weight matrix
-    int l = as<List>( net["module"] ).length();
+    int l = as<int>( net["numModules"] );
     for ( int i = 0; i < l; i++ ){
       List module = as<List>( net["module"] )[i];
       removeF2Nodes( module );  // remove all node candidates one last time
       module["w"] = subsetRows( module["w"], module["numCategories"] );
-      module["edge"] = vectorToMatrix( module["edge"], 2, as<NumericVector>( module["edge"] ).size()/2 );
-      module["linkedClusters"] = ::linkClusters( module["edge"], seq( 0,as<NumericMatrix>( module["w"] ).rows() - 1 ) );
+      if ( as<NumericVector>( module["edge"] ).size() > 0 ){
+        module["edge"] = vectorToMatrix( module["edge"], 2, as<NumericVector>( module["edge"] ).size()/2 );
+        module["linkedClusters"] = ::linkClusters( module["edge"], seq( 0,as<NumericMatrix>( module["w"] ).rows() - 1 ) );
+      }
     }
 
   }
