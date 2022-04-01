@@ -102,12 +102,18 @@ void initWeight( List net, bool complement = false ){
 
 
 NumericMatrix subsetRows( NumericMatrix x, int rows ){
-
-  if (rows > x.rows()){
+  NumericMatrix y;
+  
+  if ( rows == 0 ){
+    /* return an empty matrix */
+    return y;
+  }
+  
+  if ( rows > x.rows() ){
     stop( "Too many rows have been selected." );
   }
 
-  NumericMatrix y = x( Range( 0, rows - 1 ), _ );
+  y = x( Range( 0, rows - 1 ), _ );
   return y;
 }
 
