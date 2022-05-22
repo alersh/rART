@@ -3,9 +3,10 @@
 \name{ART}
 \alias{ART}
 \alias{isART}
-\title{Create an ART Network}
+\title{ART}
 \usage{
 ART(
+  numModules = 1,
   rule = c("fuzzy", "hypersphere"),
   dimension,
   vigilance = 0.7,
@@ -16,7 +17,9 @@ ART(
 isART(net)
 }
 \arguments{
-\item{rule}{The activation / match / learning rule to use. The choices available are fuzzy and hypersphere.}
+\item{numModules}{The number of modules in the network. Currently, it supports only 1 module.}
+
+\item{rule}{The activation / match / lerning rule to use. The choices available are fuzzy.}
 
 \item{dimension}{The number of dimension/features in the data.}
 
@@ -25,10 +28,10 @@ isART(net)
 \item{learningRate}{The learning rate. Must be between 0 and 1.}
 
 \item{net}{An object}
+
+\item{phi}{The noise threshold}
 }
 \value{
-ART returns an ART object.
-
 isART returns a logical value.
 }
 \description{
