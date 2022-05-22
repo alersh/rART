@@ -5,27 +5,27 @@
 
 using namespace Rcpp;
 
-// trainART
-void trainART(List net, NumericMatrix x);
-RcppExport SEXP _rART_trainART(SEXP netSEXP, SEXP xSEXP) {
+// train
+void train(List net, NumericMatrix x);
+RcppExport SEXP _rART_train(SEXP netSEXP, SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< List >::type net(netSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
-    trainART(net, x);
+    train(net, x);
     return R_NilValue;
 END_RCPP
 }
-// predictART
-List predictART(List net, int id, NumericMatrix x);
-RcppExport SEXP _rART_predictART(SEXP netSEXP, SEXP idSEXP, SEXP xSEXP) {
+// predict
+List predict(List net, int id, NumericMatrix x);
+RcppExport SEXP _rART_predict(SEXP netSEXP, SEXP idSEXP, SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< List >::type net(netSEXP);
     Rcpp::traits::input_parameter< int >::type id(idSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(predictART(net, id, x));
+    rcpp_result_gen = Rcpp::wrap(predict(net, id, x));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -42,94 +42,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type categorySize(categorySizeSEXP);
     Rcpp::traits::input_parameter< int >::type maxEpochs(maxEpochsSEXP);
     rcpp_result_gen = Rcpp::wrap(newART(dimension, num, vigilance, learningRate, categorySize, maxEpochs));
-    return rcpp_result_gen;
-END_RCPP
-}
-// newARTMAP
-List newARTMAP(int dimension, double vigilance, double learningRate, int categorySize, int maxEpochs, bool simplified);
-RcppExport SEXP _rART_newARTMAP(SEXP dimensionSEXP, SEXP vigilanceSEXP, SEXP learningRateSEXP, SEXP categorySizeSEXP, SEXP maxEpochsSEXP, SEXP simplifiedSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type dimension(dimensionSEXP);
-    Rcpp::traits::input_parameter< double >::type vigilance(vigilanceSEXP);
-    Rcpp::traits::input_parameter< double >::type learningRate(learningRateSEXP);
-    Rcpp::traits::input_parameter< int >::type categorySize(categorySizeSEXP);
-    Rcpp::traits::input_parameter< int >::type maxEpochs(maxEpochsSEXP);
-    Rcpp::traits::input_parameter< bool >::type simplified(simplifiedSEXP);
-    rcpp_result_gen = Rcpp::wrap(newARTMAP(dimension, vigilance, learningRate, categorySize, maxEpochs, simplified));
-    return rcpp_result_gen;
-END_RCPP
-}
-// trainARTMAP
-void trainARTMAP(List net, NumericMatrix x, Nullable< NumericVector > vTarget, Nullable< NumericMatrix > mTarget);
-RcppExport SEXP _rART_trainARTMAP(SEXP netSEXP, SEXP xSEXP, SEXP vTargetSEXP, SEXP mTargetSEXP) {
-BEGIN_RCPP
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< List >::type net(netSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
-    Rcpp::traits::input_parameter< Nullable< NumericVector > >::type vTarget(vTargetSEXP);
-    Rcpp::traits::input_parameter< Nullable< NumericMatrix > >::type mTarget(mTargetSEXP);
-    trainARTMAP(net, x, vTarget, mTarget);
-    return R_NilValue;
-END_RCPP
-}
-// predictARTMAP
-List predictARTMAP(List net, NumericMatrix x, Nullable< NumericVector > vTarget, Nullable< NumericMatrix > mTarget, bool test);
-RcppExport SEXP _rART_predictARTMAP(SEXP netSEXP, SEXP xSEXP, SEXP vTargetSEXP, SEXP mTargetSEXP, SEXP testSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< List >::type net(netSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
-    Rcpp::traits::input_parameter< Nullable< NumericVector > >::type vTarget(vTargetSEXP);
-    Rcpp::traits::input_parameter< Nullable< NumericMatrix > >::type mTarget(mTargetSEXP);
-    Rcpp::traits::input_parameter< bool >::type test(testSEXP);
-    rcpp_result_gen = Rcpp::wrap(predictARTMAP(net, x, vTarget, mTarget, test));
-    return rcpp_result_gen;
-END_RCPP
-}
-// TopoART
-List TopoART(int dimension, int num, double vigilance, double learningRate1, double learningRate2, int tau, int phi, int categorySize, int maxEpochs);
-RcppExport SEXP _rART_TopoART(SEXP dimensionSEXP, SEXP numSEXP, SEXP vigilanceSEXP, SEXP learningRate1SEXP, SEXP learningRate2SEXP, SEXP tauSEXP, SEXP phiSEXP, SEXP categorySizeSEXP, SEXP maxEpochsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type dimension(dimensionSEXP);
-    Rcpp::traits::input_parameter< int >::type num(numSEXP);
-    Rcpp::traits::input_parameter< double >::type vigilance(vigilanceSEXP);
-    Rcpp::traits::input_parameter< double >::type learningRate1(learningRate1SEXP);
-    Rcpp::traits::input_parameter< double >::type learningRate2(learningRate2SEXP);
-    Rcpp::traits::input_parameter< int >::type tau(tauSEXP);
-    Rcpp::traits::input_parameter< int >::type phi(phiSEXP);
-    Rcpp::traits::input_parameter< int >::type categorySize(categorySizeSEXP);
-    Rcpp::traits::input_parameter< int >::type maxEpochs(maxEpochsSEXP);
-    rcpp_result_gen = Rcpp::wrap(TopoART(dimension, num, vigilance, learningRate1, learningRate2, tau, phi, categorySize, maxEpochs));
-    return rcpp_result_gen;
-END_RCPP
-}
-// topoTrain
-void topoTrain(List net, NumericMatrix x, Nullable< NumericVector > labels);
-RcppExport SEXP _rART_topoTrain(SEXP netSEXP, SEXP xSEXP, SEXP labelsSEXP) {
-BEGIN_RCPP
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< List >::type net(netSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
-    Rcpp::traits::input_parameter< Nullable< NumericVector > >::type labels(labelsSEXP);
-    topoTrain(net, x, labels);
-    return R_NilValue;
-END_RCPP
-}
-// topoPredict
-List topoPredict(List net, int id, NumericMatrix x);
-RcppExport SEXP _rART_topoPredict(SEXP netSEXP, SEXP idSEXP, SEXP xSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< List >::type net(netSEXP);
-    Rcpp::traits::input_parameter< int >::type id(idSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(topoPredict(net, id, x));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -173,15 +85,9 @@ END_RCPP
 RcppExport SEXP run_testthat_tests(SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_rART_trainART", (DL_FUNC) &_rART_trainART, 2},
-    {"_rART_predictART", (DL_FUNC) &_rART_predictART, 3},
+    {"_rART_train", (DL_FUNC) &_rART_train, 2},
+    {"_rART_predict", (DL_FUNC) &_rART_predict, 3},
     {"_rART_newART", (DL_FUNC) &_rART_newART, 6},
-    {"_rART_newARTMAP", (DL_FUNC) &_rART_newARTMAP, 6},
-    {"_rART_trainARTMAP", (DL_FUNC) &_rART_trainARTMAP, 4},
-    {"_rART_predictARTMAP", (DL_FUNC) &_rART_predictARTMAP, 5},
-    {"_rART_TopoART", (DL_FUNC) &_rART_TopoART, 9},
-    {"_rART_topoTrain", (DL_FUNC) &_rART_topoTrain, 3},
-    {"_rART_topoPredict", (DL_FUNC) &_rART_topoPredict, 3},
     {"_rART_linkClusters", (DL_FUNC) &_rART_linkClusters, 2},
     {"_rART_encodeNumericLabel", (DL_FUNC) &_rART_encodeNumericLabel, 2},
     {"_rART_encodeStringLabel", (DL_FUNC) &_rART_encodeStringLabel, 2},
