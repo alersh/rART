@@ -38,33 +38,6 @@ NumericVector colMin( NumericMatrix x ){
   return v;
 }
 
-
-// sameCode: A function that returns the vector x as is.
-NumericVector sameCode( NumericVector x ){
-  return x;
-}
-
-// complementCode: Create complement code
-NumericVector complementCode( NumericVector x ){
-  int s = x.size();
-  NumericVector c( s*2 );
-  for ( int i = 0; i < s; i++ ){
-    c[i] = x[i];
-    c[i+s] = 1 - x[i];
-  }
-  return c;
-}
-
-// uncomplementCode: Remove the complement part of the code and return the original
-NumericVector uncomplementCode( NumericVector x ){
-  int l = x.length();
-  // the length must be even
-  if ( l % 2 != 0 )
-    stop( "The length of the code must be an even number." );
-
-  return x[ Range( 0, l/2 ) ];
-}
-
 // appendRows: append rows to a matrix
 NumericMatrix appendRows( NumericMatrix x, int numRows ){
   int nrow = x.nrow();
@@ -77,28 +50,42 @@ NumericMatrix appendRows( NumericMatrix x, int numRows ){
   return v;
 }
 
-// appendVector: append a vector
-NumericVector appendVector( NumericVector v1, NumericVector v2 ){
-  int l = v2.length();
+// appendColumns: append columns to a matrix
+NumericMatrix appendColumns( NumericMatrix x, int numCols ){
+  int nrow = x.nrow();
+  int ncol = x.ncol();
+  NumericMatrix v ( nrow, ncol + numCols );
+  for ( int i = 0; i < ncol; i++ ){
+    v ( _,i ) = x( _,i );
+  }
+  return v;
+}
+
+template <class T> T lengthenVector( T x, int length ){
+  int l = x.length();
+  T v ( l + length );
   for ( int i = 0; i < l; i++ ){
-    v1.push_back( v2[i] );
+    v( i ) = x( i );
   }
-  return v1;
+  return v;
 }
+template IntegerVector lengthenVector( IntegerVector x, int length );
+template NumericVector lengthenVector( NumericVector x, int length );
 
-// initComplementWeight: initialize weight and its complement
-void initWeight( List net, bool complement = false ){
-  // initialize weight dimension
-  int dim = as<int>( net["dimension"] );
-  if ( complement ){
-    dim *= 2;
+template <class T> T appendVector( T v1, T v2 ){
+  int l1 = v1.length();
+  int l2 = v2.length();
+  T v( l1 + l2 );
+  for ( int i = 0; i < l1; i++ ){
+    v( i ) = v1( i );
   }
-
-  int size = as<int>( net["capacity"] );
-  NumericMatrix w = net["w"];
-  w = no_init( size, dim );
-  net["w"] = w;
+  for ( int i = 0; i < l2; i++ ){
+    v( i + l1 ) = v2( i );
+  }
+  return v;
 }
+template IntegerVector appendVector( IntegerVector v1, IntegerVector v2 );
+template NumericVector appendVector( NumericVector v1, NumericVector v2 );
 
 
 NumericMatrix subsetRows( NumericMatrix x, int rows ){
@@ -117,6 +104,18 @@ NumericMatrix subsetRows( NumericMatrix x, int rows ){
   return y;
 }
 
+IntegerVector subsetVector( IntegerVector x, int length ){
+  IntegerVector y;
+  if ( length == 0 ){
+    return y;
+  }
+  if ( length > x.length() ){
+    stop( "Too many rows have been selected." );
+  }
+  
+  y = x[Range( 0, length - 1 )];
+  return y;
+}
 
 NumericVector vectorToMatrix( NumericVector v, int nrow, int ncol ){
   v.attr( "dim" ) = Dimension( nrow, ncol );

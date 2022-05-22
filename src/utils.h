@@ -17,25 +17,21 @@ NumericVector colMax( NumericMatrix x );
 // colMin: get minimum values in all columns
 NumericVector colMin( NumericMatrix x );
 
-// sameCode: A function that returns the code x as is.
-NumericVector sameCode( NumericVector x );
-
-// complementCode: Create complement code
-NumericVector complementCode( NumericVector x );
-
-// uncomplementCode: Remove the complement part of the code and return the original
-NumericVector uncomplementCode( NumericVector x );
-
 // appendRows: append rows to a matrix
 NumericMatrix appendRows( NumericMatrix x, int numRows );
 
-// appendVector: append a vector
-NumericVector appendVector( NumericVector v1, NumericVector v2 );
+// appendColumns: append columns to a matrix
+NumericMatrix appendColumns( NumericMatrix x, int numCols );
 
-// initComplementWeight: Initialize weight and its complement
-void initWeight( List net, bool complement );
+// lengthenVector: append length to a vector
+template <class T> T lengthenVector( T x, int length );
+
+// appendVector: append a vector
+template <class T> T appendVector( T v1, T v2 );
 
 NumericMatrix subsetRows( NumericMatrix x, int rows );
+
+IntegerVector subsetVector( IntegerVector x, int length );
 
 // vectorToMatrix: Set a NumericVector as a NumericMatrix
 NumericVector vectorToMatrix( NumericVector v, int nrow, int ncol );
