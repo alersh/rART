@@ -28,8 +28,6 @@ isART(net)
 \item{learningRate}{The learning rate. Must be between 0 and 1.}
 
 \item{net}{An object}
-
-\item{phi}{The noise threshold}
 }
 \value{
 isART returns a logical value.
