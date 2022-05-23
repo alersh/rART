@@ -21,7 +21,7 @@
 #include "utils.h"
 using namespace Rcpp;
 using namespace std;
-#include "Fuzzy.h"
+#include "fuzzy.h"
 
 bool isFuzzy ( List net ){
   return as<string>( net.attr( "rule" ) ).compare( "fuzzy" ) == 0;
