@@ -8,8 +8,8 @@
 
 #include <Rcpp.h>
 #include "utils.h"
-#include "Fuzzy.h"
-//#include "Hypersphere.h"
+#include "fuzzy.h"
+#include "hypersphere.h"
 using namespace Rcpp;
 using namespace std;
 
@@ -516,11 +516,9 @@ void train ( List net, NumericMatrix x ){
     model = new Fuzzy( net );
   }
   
-  /*
   if ( isHypersphere( net ) ){
     model = new Hypersphere( net, x );
   }
-  */
   
   ART::init( *model );
   ART::train( *model, x );
@@ -535,13 +533,12 @@ List predict ( List net, int id, NumericMatrix x ){
   
   if ( isFuzzy( net ) ){
     model = new Fuzzy( net );
-    
   }
-  /*
+
   if ( isHypersphere( net ) ){
     model = new Hypersphere( net );
   }
-   */
+
   
   List results = ART::predict( *model, id, x );
   delete model;
