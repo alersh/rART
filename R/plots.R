@@ -70,9 +70,9 @@ plot.ARTMAP <- function(net, .data, classes = NULL, dummyCodeMap = NULL){
   module <- getModuleById(net, id = 0) # always plot ART a
   labels <- NULL
   if (!isSimplified(net)){
-    labels <- decode(net$mapfield$ab$w, dummyCodeMap)
+    labels <- decode(net$mapfield$w, dummyCodeMap)
   } else{
-    labels <- net$mapfield$ab$w
+    labels <- net$mapfield$w
   }
 
   ggplot() + geom_point(data = .data, aes_(x = sym(cols[1]), y = sym(cols[2]), color = sym(cols[3]))) +

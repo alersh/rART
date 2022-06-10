@@ -114,7 +114,7 @@ train.ARTMAP <- function(network, .data, target){
     .trainARTMAP(network, .data, vTarget = target)
   } else{
     # it is a matrix
-    .trainARTMAP(network, .data, mTarget = target)
+    .trainARTMAP(network, .data, vTarget = NULL, mTarget = target)
   }
 }
 
@@ -164,19 +164,18 @@ predict.ARTMAP <- function(network, .data, target = NULL){
       stop("The target must be either a vector or a matrix.")
     }
     
-    test <- TRUE
     if (!isSimplified(network)){
       if (!is.matrix(target))
         target <- as.matrix(target)
-      p <- .predictARTMAP(network, .data, mTarget = target, test = test)
+      p <- .predictARTMAP(network, .data, mTarget = target)
     } else{
       if (!is.vector(target)){
         stop("The simplified ARTMAP requires a vector for the target.")
       }
-      p <- .predictARTMAP(network, .data, vTarget = target, test = test)
+      p <- .predictARTMAP(network, .data, vTarget = target)
     }
   } else{
-    p <- .predictARTMAP(network, .data, test = test)
+    p <- .predictARTMAP(network, .data)
     
   }
   return (p)
