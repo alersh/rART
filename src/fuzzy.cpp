@@ -74,7 +74,6 @@ NumericVector Fuzzy::unProcessCode( NumericVector x ){
   // the length must be even
   if ( l % 2 != 0 )
     stop( "The length of the code must be an even number." );
-  
-  return x[ Range( 0, l/2 ) ];
+  return x[ Range( 0, l/2 - 1 ) ];
 }
 
