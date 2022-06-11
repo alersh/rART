@@ -92,10 +92,10 @@ namespace ARTMAP {
       IntegerVector wm = getWeightVector( mapfield );
       if ( numCategories == wm.length() ){
         // reached the max capacity, so add more rows
-        IntegerVector newWeight = lengthenVector( wm, ART::getCapacity( mapfield ) );
+        IntegerVector newWeight = appendVector( wm, ART::getCapacity( mapfield ) );
         setWeightVector( mapfield, newWeight );
         
-        IntegerVector c = lengthenVector( ART::getChangeVector( mapfield ), ART::getCapacity( mapfield ) );
+        IntegerVector c = appendVector( ART::getChangeVector( mapfield ), ART::getCapacity( mapfield ) );
         ART::setChangeVector( mapfield, c );
       }
       setWeight( mapfield, newCategoryIndex, label );
@@ -310,7 +310,7 @@ namespace ARTMAP {
         newWeight = appendRows( wm, ART::getCapacity( mapfield ) );
         ART::setWeightMatrix( mapfield, newWeight );
         
-        IntegerVector c = lengthenVector( ART::getChangeVector( mapfield ), ART::getCapacity( mapfield ) );
+        IntegerVector c = appendVector( ART::getChangeVector( mapfield ), ART::getCapacity( mapfield ) );
         ART::setChangeVector( mapfield, c );
       }
       else{
