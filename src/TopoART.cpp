@@ -273,7 +273,7 @@ namespace Topo {
     int newCategoryIndex = numCategories;
     IntegerVector v = getAccumulatorVector( module );
     if ( numCategories == v.length() ){
-      IntegerVector n = lengthenVector( v, ART::getCapacity( module ) );
+      IntegerVector n = appendVector( v, ART::getCapacity( module ) );
       setAccumulatorVector( module, n );
     }
     accumulatorUpdate( module, newCategoryIndex );
@@ -395,9 +395,9 @@ namespace Topo {
           }
         }
         for ( int j = 0; j < numModules; j++ ){
-          cout << "ID " << j << " Number of changes: " << ART::getChangeSum( ART::getModule( model.net, j ) ) << endl;
+          cout << "ID " << j << " Number of changes: " << ART::getModuleChange( ART::getModule( model.net, j ) ) << endl;
         }
-        if ( ART::unchanged( model.net ) ) {
+        if ( ART::getTotalChange( model.net ) == 0 ) {
           ART::setEpoch( model.net, epoch );
           complete = true;
           break;
