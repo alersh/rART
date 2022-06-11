@@ -45,7 +45,6 @@ NumericMatrix appendRows( NumericMatrix x, int numRows ){
   NumericMatrix v ( nrow + numRows, ncol );
   for (int i = 0; i < nrow; i++){
     v ( i,_ ) = x( i,_ );
-
   }
   return v;
 }
@@ -61,7 +60,8 @@ NumericMatrix appendColumns( NumericMatrix x, int numCols ){
   return v;
 }
 
-template <class T> T lengthenVector( T x, int length ){
+// appendVector: increase vector length
+template <class T> T appendVector( T x, int length ){
   int l = x.length();
   T v ( l + length );
   for ( int i = 0; i < l; i++ ){
@@ -69,10 +69,11 @@ template <class T> T lengthenVector( T x, int length ){
   }
   return v;
 }
-template IntegerVector lengthenVector( IntegerVector x, int length );
-template NumericVector lengthenVector( NumericVector x, int length );
+template IntegerVector appendVector( IntegerVector x, int length );
+template NumericVector appendVector( NumericVector x, int length );
 
-template <class T> T appendVector( T v1, T v2 ){
+// joinVectors: Join two vectors together
+template <class T> T joinVectors( T v1, T v2 ){
   int l1 = v1.length();
   int l2 = v2.length();
   T v( l1 + l2 );
@@ -84,8 +85,8 @@ template <class T> T appendVector( T v1, T v2 ){
   }
   return v;
 }
-template IntegerVector appendVector( IntegerVector v1, IntegerVector v2 );
-template NumericVector appendVector( NumericVector v1, NumericVector v2 );
+template IntegerVector joinVectors( IntegerVector v1, IntegerVector v2 );
+template NumericVector joinVectors( NumericVector v1, NumericVector v2 );
 
 
 NumericMatrix subsetRows( NumericMatrix x, int rows ){
@@ -101,6 +102,22 @@ NumericMatrix subsetRows( NumericMatrix x, int rows ){
   }
 
   y = x( Range( 0, rows - 1 ), _ );
+  return y;
+}
+
+NumericMatrix subsetColumns( NumericMatrix x, int cols ){
+  NumericMatrix y;
+  
+  if ( cols == 0 ){
+    /* return an empty matrix */
+    return y;
+  }
+  
+  if ( cols > x.cols() ){
+    stop( "Too many columns have been selected." );
+  }
+  
+  y = x( _, Range( 0, cols - 1 ) );
   return y;
 }
 

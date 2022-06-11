@@ -24,12 +24,14 @@ NumericMatrix appendRows( NumericMatrix x, int numRows );
 NumericMatrix appendColumns( NumericMatrix x, int numCols );
 
 // lengthenVector: append length to a vector
-template <class T> T lengthenVector( T x, int length );
+template <class T> T appendVector( T x, int length );
 
 // appendVector: append a vector
-template <class T> T appendVector( T v1, T v2 );
+template <class T> T joinVectors( T v1, T v2 );
 
 NumericMatrix subsetRows( NumericMatrix x, int rows );
+
+NumericMatrix subsetColumns( NumericMatrix x, int cols );
 
 IntegerVector subsetVector( IntegerVector x, int length );
 
