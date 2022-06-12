@@ -75,6 +75,8 @@ generalization.
 Here is an example of using Fuzzy ART to cluster different shapes:
 
 ``` r
+library(mlbench)
+library(rART)
 trainShapes <- mlbench.shapes(n = 5000)
 trainShapes$x <- normalize(trainShapes$x)
 art <- ART(rule = "fuzzy", dimension = 2, vigilance = 0.93) # create an ART object
@@ -97,18 +99,20 @@ Here is a circle-in-a-square classification problem solved with the
 simplified Fuzzy ARTMAP:
 
 ``` r
+library(mlbench)
+library(rART)
 # circle in a square
 trainCirSquare <- mlbench.circle(n = 10000)
 testCirSquare <- mlbench.circle(n = 1000)
 artmap <- ARTMAP(rule = "fuzzy", dimension = 2, vigilance = 0.8)
-train(artmap, trainCirSquare$x, as.numeric(trainCirSquare$classes))
-plot(artmap, .data = trainCirSquare$x, classes = trainCirSquare$classes) # create the 2 dimensional plot of the data and the weights
+train(artmap, normalize(trainCirSquare$x), as.numeric(trainCirSquare$classes))
+plot(artmap, .data = normalize(trainCirSquare$x), classes = trainCirSquare$classes) # create the 2 dimensional plot of the data and the weights
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
 ``` r
-p <- predict(artmap, .data = testCirSquare$x, target = as.numeric(testCirSquare$classes))
+p <- predict(artmap, .data = normalize(testCirSquare$x), target = as.numeric(testCirSquare$classes))
 sum(p$matched)/length(p$matched) * 100 # percent correct
 #> [1] 98.4
 ```
@@ -121,6 +125,8 @@ dummy codes. The function encodeLabel() converts all the target labels
 into dummy codes using this dummy code map.
 
 ``` r
+library(mlbench)
+library(rART)
 # circle in a square
 trainCirSquare <- mlbench.circle(n = 10000)
 testCirSquare <- mlbench.circle(n = 1000)
@@ -128,16 +134,16 @@ artmap <- ARTMAP(rule = "fuzzy", dimension = 2, vigilance = 0.9, simplified = FA
 dummyMap <- createDummyCodeMap(unique(trainCirSquare$classes))
 trainCirSquare$dummyClasses <- encodeLabel(trainCirSquare$classes, dummyMap)
 testCirSquare$dummyClasses <- encodeLabel(testCirSquare$classes, dummyMap)
-train(artmap, trainCirSquare$x, trainCirSquare$dummyClasses)
-plot(artmap, .data = trainCirSquare$x, classes = trainCirSquare$dummyClasses, dummyCodeMap = dummyMap) # create the 2 dimensional plot of the data and the weights
+train(artmap, normalize(trainCirSquare$x), trainCirSquare$dummyClasses)
+plot(artmap, .data = normalize(trainCirSquare$x), classes = trainCirSquare$dummyClasses, dummyCodeMap = dummyMap) # create the 2 dimensional plot of the data and the weights
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
 ``` r
-p <- predict(artmap, .data = testCirSquare$x, target = testCirSquare$dummyClasses)
+p <- predict(artmap, .data = normalize(testCirSquare$x), target = testCirSquare$dummyClasses)
 sum(p$matched, na.rm = T)/length(p$matched) * 100 # percent correct
-#> [1] 96.8
+#> [1] 98.3
 ```
 
 The standard ARTMAP is better suited for regression
@@ -145,6 +151,7 @@ problems<sup>2</sup>. Below is an example that uses the standard Fuzzy
 ARTMAP to approximate a sinusoidal function:
 
 ``` r
+library(rART)
 x = seq(0, 1, by = 0.001)
 y <- (sin(2*pi*x))^2
 fn <- cbind(x = x, y = y) # function to be approximated
@@ -190,9 +197,10 @@ size in module 1. The user can specify which module to plot by entering
 the id number (0 for the first module and 1 for the second module).
 
 ``` r
+library(rART)
 # smiley face
 data(noisySmiley)
-topoart <- TopoART(rule = "fuzzy", dimension = 2, vigilance = 0.88, tau = 200, phi = 5)
+topoart <- TopoART(rule = "fuzzy", dimension = 2, vigilance = 0.78, tau = 200, phi = 6)
 train(topoart, noisySmiley)
 plot(topoart, id = 0, noisySmiley) # the ART a module
 ```
