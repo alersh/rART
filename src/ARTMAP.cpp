@@ -251,6 +251,7 @@ namespace ARTMAP {
         return F1;
       }
       F1 = ART::getWeight( module_b, nodeIndex_b ); 
+      
       return F1;
     }
     
@@ -483,8 +484,6 @@ namespace ARTMAP {
       NumericVector predicted( getNumCategories_b( mapfield ), NA_REAL );
       NumericVector F1_b( ART::getWeightMatrix( module_b ).cols(), NA_REAL );
       
-      int matched = NA_INTEGER;
-      
       NumericVector a = ART::activation( model, module_a, d );
       NumericVector T_j = sortIndex( a );
       bool resonance = false;
@@ -521,8 +520,7 @@ namespace ARTMAP {
       } // while resonance
       
       return List::create( _["category_a"] = category_a,
-                           _["F1_b"] = F1_b,
-                           _["matched"] = matched );
+                           _["F1_b"] = F1_b );
       
     }
   
@@ -643,6 +641,7 @@ namespace ARTMAP {
       
       for ( int i = 0; i < nrow; i++ ){
         List result = standard::classify( model, model.processCode( x( i,_ ) ) );
+        predicted( i, _ ) = model.unProcessCode( result( "F1_b" ) );
         category_a( i ) = result( "category_a" );
         if ( mTarget.isNotNull() ){
           matched( i ) = standard::test( model, model.processCode( NumericMatrix ( mTarget )( i, _ ) ) );
