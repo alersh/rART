@@ -705,7 +705,12 @@ void trainARTMAP ( List net, NumericMatrix x, Nullable< NumericVector > vTarget 
   }
   
   if ( isHypersphere( net ) ){
-    model = new Hypersphere( net, x );
+    if ( ARTMAP::isSimplified( net ) ){
+      model = new Hypersphere( net, x );
+    }
+    else{
+      stop( "The hypersphere model can only be used in the simplified ARTMAP." );
+    }
   }
   
   ART::init( *model );
@@ -723,7 +728,12 @@ List predictARTMAP ( List net, NumericMatrix x, Nullable< NumericVector > vTarge
     model = new Fuzzy ( net );
   }
   if ( isHypersphere( net ) ){
-    model = new Hypersphere( net, x );
+    if ( ARTMAP::isSimplified( net ) ){
+      model = new Hypersphere( net, x );
+    }
+    else{
+      stop( "The hypersphere model can only be used in the simplified ARTMAP." );
+    }
   }
   
   List results = ARTMAP::predict( *model, x, vTarget, mTarget );
