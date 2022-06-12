@@ -23,7 +23,7 @@ namespace ART {
     IntegerVector jmax;  
     jmax.push_back( -1 );  // one element of -1
     List module = List::create( _["id"] = id,                   // module id
-                                _["weightDimension"] = R_NaInt, // the number of dimensions in the weight
+                                _["weightDimension"] = 0,       // the number of dimensions in the weight
                                 _["capacity"] = categorySize,   // number of category to create when the module runs out of categories to match
                                 _["numCategories"] = 0,         // number of categories created during learning
                                 _["alpha"] = 0.001,             // activation function parameter
@@ -74,7 +74,7 @@ namespace ART {
     
     
     List net = List::create( _["numModules"] = num,       // number of ART modules
-                             _["dimension"] = dimension,     // number of features
+                             _["dimension"] = dimension,  // number of features
                              _["epochs"] = 0,             // total number of epochs required to learn
                              _["maxEpochs"] = maxEpochs,  // maximum number of epochs
                              _["activeModule"] = -1       // an index that keeps track of which module is currently active
@@ -100,6 +100,10 @@ namespace ART {
   
   int getID( List module ){
     return module["id"];
+  }
+
+  int getDimension( List net ){
+    return net["dimension"];
   }
   
   int getJmax( List module, int matchIndex = 0 ){
@@ -154,9 +158,20 @@ namespace ART {
     as<IntegerVector>( module["change"] )[index]++;
   }
   
-  int getChangeSum( List module ){
+  int getModuleChange( List module ){
     return sum( as<IntegerVector>( module["change"] ) );
   }
+
+  int getTotalChange( List net ){
+    int n = getNumModules( net );
+    int s = 0;
+    for ( int i = 0; i < n; i++ ){
+      List module = getModule( net, i );
+      s += getModuleChange( module );
+    }
+    return s;
+  }
+
   IntegerVector getChangeVector( List module ){
     return module["change"];
   }
@@ -174,21 +189,7 @@ namespace ART {
     
     module["change"] = c;
   }
-  
-  bool unchanged( List net ){
-    int n = getNumModules( net );
-    int s = 0;
-    for ( int i = 0; i < n; i++ ){
-      List module = getModule( net, i );
-      s += getChangeSum( module );
-    }
-    return s == 0;
-  }
-  
-  int getDimension( List net ){
-    return net["dimension"];
-  }
-  
+
   int getCapacity( List module ){
     return module["capacity"];
   }
@@ -199,14 +200,15 @@ namespace ART {
   void setWeightMatrix( List module, NumericMatrix w ){
     module["w"] = w;
   }
-  
-  void initWeights( List module, int dim ){
-    int size = ART::getCapacity( module );
-    NumericMatrix w = no_init( size, dim );
-    NumericVector v( size );
-    setWeightMatrix( module, w );
-    module["weightDimension"] = dim;
+
+  int getWeightDimension( List module ){
+    return module["weightDimension"];
   }
+
+  void setWeightDimension( List module, int dimension ){
+    module["weightDimension"] = dimension;
+  }
+  
   NumericVector getWeight( List module, int weightIndex ) {
     return getWeightMatrix( module )( weightIndex, _ );
   }
@@ -277,10 +279,9 @@ namespace ART {
   
   void initModule( List module, int weightDimension ){
     int size = ART::getCapacity( module );
-    module["weightDimension"] = weightDimension;
+    setWeightDimension( module, weightDimension );
     
     NumericMatrix w = no_init( size, weightDimension );
-    NumericVector v( size );
     setWeightMatrix( module, w );
     
     IntegerVector n( size );
@@ -340,17 +341,17 @@ namespace ART {
       NumericMatrix newWeight = appendRows( wm, getCapacity( module ) );
       setWeightMatrix( module, newWeight );
       
-      IntegerVector n = lengthenVector( getCounterVector( module ), getCapacity( module ) );
+      IntegerVector n = appendVector( getCounterVector( module ), getCapacity( module ) );
       setCounterVector( module, n );
       
-      IntegerVector c = lengthenVector( getChangeVector( module ), getCapacity( module ) );
+      IntegerVector c = appendVector( getChangeVector( module ), getCapacity( module ) );
       setChangeVector( module, c );
     }
     setWeight( module, newCategoryIndex, model.newWeight( x ) );
     counterUpdate( module, newCategoryIndex );
     incChange( module, newCategoryIndex );
     setNumCategories( module, newCategoryIndex + 1 );
-    
+    setJmax( module, newCategoryIndex );
   }
   
   void learn( IModel &model,
@@ -452,9 +453,10 @@ namespace ART {
       }
       
       for ( int j = 0; j < numModules; j++ ){
-        cout << "ID " << j << " Number of changes: " << getChangeSum( ART::getModule( model.net, j ) ) << endl;
+        int change = getModuleChange( ART::getModule( model.net, j ) );
+        cout << "ID " << j << " Number of changes: " << change << endl;
       }
-      if ( unchanged( model.net ) ) {
+      if ( getTotalChange( model.net ) == 0 ) {
         ART::setEpoch( model.net, i );
         break;
       } else{

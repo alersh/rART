@@ -27,11 +27,11 @@ namespace ART {
         int getMaxEpochs( List net );
         void setEpoch( List net, int epoch );
         void incChange( List module, int index );
-        int getChangeSum( List module );
+        int getModuleChange( List module );
+        int getTotalChange( List net );
         IntegerVector getChangeVector( List module );
         void setChangeVector( List module, IntegerVector v );
         void changeReset( List module );
-        bool unchanged( List module );
         int getNumModules( List net );
         List module ( int id, double vigilance = 0.75, double learningRate = 1.0, int categorySize = 100 );
         List getModule( List net, int moduleID );
@@ -39,6 +39,8 @@ namespace ART {
         bool hasMoreModules( List net, int currentModuleID );
         NumericMatrix getWeightMatrix( List module );
         void setWeightMatrix( List module, NumericMatrix w );
+        int getWeightDimension( List module );
+        void setWeightDimension( List module, int dimension );
         void initWeights( List module, int dim );
         NumericVector getWeight( List module, int weightIndex );
         void setWeight( List module, int weightIndex, NumericVector w );
