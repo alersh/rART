@@ -50,7 +50,11 @@ namespace ARTMAP {
     
     return module;
   }
-  
+
+  bool isSimplified( List net ){
+    return as<bool>( net.attr( "simplified" ) );
+  }
+
   List getMapfield ( List net ){
     return net["mapfield"];
   }
@@ -65,10 +69,6 @@ namespace ARTMAP {
 
   namespace simplified {
   
-    bool isSimplified( List net ){
-      return as<bool>( net.attr( "simplified" ) );
-    }
-    
     int getWeight( List mapfield, int index ){
       return as<IntegerVector>( mapfield["w"] )[index];
     }
@@ -539,7 +539,7 @@ namespace ARTMAP {
 
   void init( IModel &model ){
     List mapfield = getMapfield( model.net );
-    if ( simplified::isSimplified( model.net ) ){
+    if ( isSimplified( model.net ) ){
       simplified::initMapfield( mapfield );
     } else{
       standard::initMapfield( mapfield );
@@ -556,17 +556,17 @@ namespace ARTMAP {
     if ( !isARTMAP( model.net ) ){
       stop( "The network is not an ARTMAP." );
     }
-    if ( !mTarget.isNotNull() && !simplified::isSimplified( model.net ) ){
+    if ( !mTarget.isNotNull() && !isSimplified( model.net ) ){
       stop( "The labels are missing. End running." );
     }
-    else if ( !vTarget.isNotNull() && simplified::isSimplified( model.net ) ){
+    else if ( !vTarget.isNotNull() && isSimplified( model.net ) ){
       stop("The labels are missing. End running.");
     }
     for (int i = 1; i <= ep; i++){
       std::cout << "Epoch no. " << i << std::endl;
       
       for (int j = 0; j < nrow; j++){
-        if ( simplified::isSimplified( model.net ) )
+        if ( isSimplified( model.net ) )
           simplified::learn( model, model.processCode( x( j, _ ) ), NumericVector ( vTarget )( j ) );
         else 
           standard::learn( model, model.processCode( x( j, _ ) ), model.processCode( NumericMatrix ( mTarget )( j, _ ) ) );
@@ -585,7 +585,7 @@ namespace ARTMAP {
         
         ART::changeReset( mapfield );
         
-        if ( !simplified::isSimplified( model.net ) ){
+        if ( !isSimplified( model.net ) ){
           List module_b = getModule_b( model.net );
           ART::changeReset( module_b );
           ART::counterReset( module_b );
@@ -603,7 +603,7 @@ namespace ARTMAP {
     }
     
     // subset mapfield weight matrix, counter and change vectors
-    if ( simplified::isSimplified( model.net ) ){
+    if ( isSimplified( model.net ) ){
       simplified::subsetMapfield( getMapfield( model.net ) );
     }
     else{
@@ -620,7 +620,7 @@ namespace ARTMAP {
     int ncol = x.cols();
     IntegerVector category_a( nrow ), matched( nrow );
     
-    if ( simplified::isSimplified( model.net ) ){
+    if ( isSimplified( model.net ) ){
       NumericVector predicted ( nrow );
       for ( int i = 0; i < nrow; i++ ){
         
