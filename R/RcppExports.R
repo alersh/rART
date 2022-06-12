@@ -13,6 +13,30 @@
     .Call('_rART_newART', PACKAGE = 'rART', dimension, num, vigilance, learningRate, categorySize, maxEpochs)
 }
 
+.ARTMAP <- function(dimension, num = 1L, vigilance = 0.75, learningRate = 1.0, categorySize = 100L, maxEpochs = 20L, simplified = FALSE) {
+    .Call('_rART_newARTMAP', PACKAGE = 'rART', dimension, num, vigilance, learningRate, categorySize, maxEpochs, simplified)
+}
+
+.trainARTMAP <- function(net, x, vTarget = NULL, mTarget = NULL) {
+    invisible(.Call('_rART_trainARTMAP', PACKAGE = 'rART', net, x, vTarget, mTarget))
+}
+
+.predictARTMAP <- function(net, x, vTarget = NULL, mTarget = NULL) {
+    .Call('_rART_predictARTMAP', PACKAGE = 'rART', net, x, vTarget, mTarget)
+}
+
+.TopoART <- function(dimension, num = 2L, vigilance = 0.9, learningRate1 = 1.0, learningRate2 = 0.6, tau = 100L, phi = 6L, categorySize = 200L, maxEpochs = 20L) {
+    .Call('_rART_TopoART', PACKAGE = 'rART', dimension, num, vigilance, learningRate1, learningRate2, tau, phi, categorySize, maxEpochs)
+}
+
+.topoTrain <- function(net, x, labels = NULL) {
+    invisible(.Call('_rART_topoTrain', PACKAGE = 'rART', net, x, labels))
+}
+
+.topoPredict <- function(net, id, x) {
+    .Call('_rART_topoPredict', PACKAGE = 'rART', net, id, x)
+}
+
 linkClusters <- function(edges, nodes) {
     .Call('_rART_linkClusters', PACKAGE = 'rART', edges, nodes)
 }
