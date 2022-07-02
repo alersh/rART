@@ -38,15 +38,50 @@ context("utilities") {
     expect_true(w.cols() == m.cols());
   }
 
-  test_that("appendVector"){
+  test_that("joinVectors"){
     NumericVector v1 = NumericVector::create(2,3,1);
     NumericVector v2 = NumericVector::create(1,5);
-    NumericVector v = appendVector(v1, v2);
+    NumericVector v = joinVectors(v1, v2);
     NumericVector toMatch = NumericVector::create(2,3,1,1,5);
     int l = v.length();
     for (int i = 0; i < l; i++){
       expect_true(v[i] == toMatch[i]);
     }
+  }
+  
+  test_that("createDummyCodeMap"){
+    List code = List::create( _["1"] = IntegerVector::create(0,0),
+                              _["2"] = IntegerVector::create(1,0),
+                              _["3"] = IntegerVector::create(0,1) );
+    StringVector v = StringVector::create("1","2","3");
+    List test = createDummyCodeMap( v );
+    expect_true( test.length() == code.length() );
+    for ( int i = 0; i < code.length(); i++ ){
+      IntegerVector c = code[i];
+      IntegerVector t = test[i];
+      expect_true( c.length() == t.length() );
+      for ( int j = 0; j < c.length(); j++ ){
+        expect_true( c[j] == t[j] );
+      }
+      
+    }
+  }
+
+  test_that("encodeNumericLabel") {
+    IntegerVector v = IntegerVector::create(1,2,3,2,3,2,1);
+    List code = createDummyCodeMap( StringVector::create( "1", "2", "3"));
+    IntegerVector actual = IntegerVector::create(0,1,0,1,0,1,0,0,0,1,0,1,0,0);
+    actual.attr("dim") = Dimension(7, 2);
+    NumericMatrix actualm = as<NumericMatrix>(actual);
+    NumericMatrix converted = encodeNumericLabel( v, code );
+    int r = converted.rows();
+    int c = converted.cols();
+    for ( int i = 0; i <  r; i++ ){
+      for ( int j = 0; j <  c; j++ ){
+        expect_true( converted(i, j) == actualm(i, j) );
+      }
+    }
+    
   }
 
 }
