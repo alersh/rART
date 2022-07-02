@@ -41,10 +41,16 @@ NumericVector vectorToMatrix( NumericVector v, int nrow, int ncol );
 // linkClusters: Linking Clusters (nodes that are linked together)
 List linkClusters( IntegerVector edges, IntegerVector nodes );
 
+// createDummyCodeMap: create dummy code for the class labels
+List createDummyCodeMap ( StringVector classLabels );
+
 // Convert all numeric labels to their dummy codes
-NumericMatrix encodeNumericLabel( NumericVector labels, List code );
+NumericMatrix encodeNumericLabel( IntegerVector labels, List code );
 
 // Convert all string labels to their dummy codes
 NumericMatrix encodeStringLabel( StringVector labels, List code );
+
+// convert the dummy codes to the original labels
+StringVector decode (NumericMatrix dummyClasses, List dummyCode);
 
 void printVector( NumericVector v );

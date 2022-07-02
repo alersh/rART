@@ -247,13 +247,29 @@ List linkClusters( IntegerVector edges, IntegerVector nodes ){
   return g;
 }
 
+// [[Rcpp::export(.createDummyCodeMap)]]
+List createDummyCodeMap ( StringVector classLabels ){
+ 
+  int l = classLabels.length();
+  IntegerVector pos = seq( 0, l );
+  List code;
+  for ( int i = 0; i < l; i++ ){
+    String label = classLabels[i];
+    code.push_back( rep( 0, l ), label.get_cstring() );
+    as<IntegerVector>( code[label.get_cstring()] )( pos[i] ) = 1;
+  }
+
+  return code;
+}
+
 // [[Rcpp::export(.encodeNumericLabel)]]
-NumericMatrix encodeNumericLabel( NumericVector labels, List code ){
+NumericMatrix encodeNumericLabel( IntegerVector labels, List code ){
   int l = labels.length();
-  int col = as<NumericVector>( code[0] ).length();
+  int col = as<IntegerVector>( code[0] ).length();
   NumericMatrix convert( l, col );
   for ( int i = 0; i < l; i++ ){
-    convert( i, _ ) = as<NumericVector>( code[to_string( labels[i] )] );
+    String s = to_string( labels[i] );
+    convert( i, _ ) = as<IntegerVector>( code[s] );
   }
   return convert;
 }
@@ -261,12 +277,31 @@ NumericMatrix encodeNumericLabel( NumericVector labels, List code ){
 // [[Rcpp::export(.encodeStringLabel)]]
 NumericMatrix encodeStringLabel( StringVector labels, List code ){
   int l = labels.length();
-  int col = as<NumericVector>( code[0] ).length();
+  int col = as<IntegerVector>( code[0] ).length();
   NumericMatrix convert( l, col );
   for ( int i = 0; i < l; i++ ){
-    convert( i, _ ) = as<NumericVector>( code[as<string>( labels[i] )] );
+    String s = labels[i];
+    convert( i, _ ) = as<IntegerVector>( code[s] );
   }
   return convert;
+}
+
+// [[Rcpp::export(.decode)]]
+StringVector decode (NumericMatrix dummyClasses, List dummyCode){
+  int rows = dummyClasses.rows();
+  int l = dummyCode.length();
+  StringVector labels( rows );
+  for ( int i = 0; i < rows; i++ ){
+    for ( int j = 0; j < l; j++ ){
+      String s = as<CharacterVector>( dummyCode.names() )[j];
+      int d = sum( abs( as<NumericVector>( dummyCode[s.get_cstring()] ) - dummyClasses( i, _ ) ) );
+      if ( d == 0 ){
+        labels[i] = s.get_cstring();
+        break;
+      } 
+    }
+  }
+  return labels;
 }
 
 void printVector( NumericVector v ){
