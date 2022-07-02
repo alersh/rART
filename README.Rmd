@@ -60,7 +60,6 @@ Here is an example of using Fuzzy ART to cluster different shapes:
 
 ```{r, fig.width = 7, fig.height = 4}
 library(mlbench)
-library(rART)
 trainShapes <- mlbench.shapes(n = 5000)
 trainShapes$x <- normalize(trainShapes$x)
 art <- ART(rule = "fuzzy", dimension = 2, vigilance = 0.93) # create an ART object
@@ -77,7 +76,6 @@ Here is a circle-in-a-square classification problem solved with the simplified F
 
 ```{r, fig.width = 7, fig.height = 4}
 library(mlbench)
-library(rART)
 # circle in a square
 trainCirSquare <- mlbench.circle(n = 10000)
 testCirSquare <- mlbench.circle(n = 1000)
@@ -92,7 +90,6 @@ The user can also implement the standard fuzzy ARTMAP^2^. In this case, the user
 
 ```{r, fig.width = 7, fig.height = 4}
 library(mlbench)
-library(rART)
 # circle in a square
 trainCirSquare <- mlbench.circle(n = 10000)
 testCirSquare <- mlbench.circle(n = 1000)
@@ -109,7 +106,6 @@ sum(p$matched, na.rm = T)/length(p$matched) * 100 # percent correct
 The standard ARTMAP is better suited for regression problems^2^. Below is an example that uses the standard Fuzzy ARTMAP to approximate a sinusoidal function:
 
 ```{r}
-library(rART)
 x = seq(0, 1, by = 0.001)
 y <- (sin(2*pi*x))^2
 fn <- cbind(x = x, y = y) # function to be approximated
@@ -135,7 +131,6 @@ The learning of the topology can be done in both TopoART modules. During learnin
 Here is an example of using TopoART to cluster a noisy smiley face. Notice the smaller category size in module 2 when comparing it to the size in module 1. The user can specify which module to plot by entering the id number (0 for the first module and 1 for the second module).
 
 ```{r, fig.width = 7, fig.height = 4}
-library(rART)
 # smiley face
 data(noisySmiley)
 topoart <- TopoART(rule = "fuzzy", dimension = 2, vigilance = 0.78, tau = 200, phi = 6)

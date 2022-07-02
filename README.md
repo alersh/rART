@@ -64,19 +64,25 @@ prior to training and testing the data. Complement coding is taken care
 of by rART internally. The combination of the fuzzy rule and complement
 coding create hyperrectangular categories.
 
-The Fuzzy ART network has two hyperparameters: Learning rate (*β*) and
-vigilance (*ρ*)<sup>3</sup>. The learning rate *β* must be between 0 and
-1. Fast learning (*β* = 1) can be achieved and is normally set as the
-default. The vigilance parameter *ρ* decides whether an input pattern
-closely matches with the weight pattern of the selected category. The
-value must be between 0 and 1. A smaller value provides more
-generalization.
+The Fuzzy ART network has two hyperparameters: Learning rate
+(![\\beta](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cbeta "\beta"))
+and vigilance
+(![\\rho](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Crho "\rho"))<sup>3</sup>.
+The learning rate
+![\\beta](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cbeta "\beta")
+must be between 0 and 1. Fast learning
+(![\\beta](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cbeta "\beta")
+= 1) can be achieved and is normally set as the default. The vigilance
+parameter
+![\\rho](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Crho "\rho")
+decides whether an input pattern closely matches with the weight pattern
+of the selected category. The value must be between 0 and 1. A smaller
+value provides more generalization.
 
 Here is an example of using Fuzzy ART to cluster different shapes:
 
 ``` r
 library(mlbench)
-library(rART)
 trainShapes <- mlbench.shapes(n = 5000)
 trainShapes$x <- normalize(trainShapes$x)
 art <- ART(rule = "fuzzy", dimension = 2, vigilance = 0.93) # create an ART object
@@ -100,7 +106,6 @@ simplified Fuzzy ARTMAP:
 
 ``` r
 library(mlbench)
-library(rART)
 # circle in a square
 trainCirSquare <- mlbench.circle(n = 10000)
 testCirSquare <- mlbench.circle(n = 1000)
@@ -114,7 +119,7 @@ plot(artmap, .data = normalize(trainCirSquare$x), classes = trainCirSquare$class
 ``` r
 p <- predict(artmap, .data = normalize(testCirSquare$x), target = as.numeric(testCirSquare$classes))
 sum(p$matched)/length(p$matched) * 100 # percent correct
-#> [1] 98.4
+#> [1] 98.8
 ```
 
 The user can also implement the standard fuzzy ARTMAP<sup>2</sup>. In
@@ -126,7 +131,6 @@ into dummy codes using this dummy code map.
 
 ``` r
 library(mlbench)
-library(rART)
 # circle in a square
 trainCirSquare <- mlbench.circle(n = 10000)
 testCirSquare <- mlbench.circle(n = 1000)
@@ -143,7 +147,7 @@ plot(artmap, .data = normalize(trainCirSquare$x), classes = trainCirSquare$dummy
 ``` r
 p <- predict(artmap, .data = normalize(testCirSquare$x), target = testCirSquare$dummyClasses)
 sum(p$matched, na.rm = T)/length(p$matched) * 100 # percent correct
-#> [1] 98.3
+#> [1] 98.7
 ```
 
 The standard ARTMAP is better suited for regression
@@ -151,7 +155,6 @@ problems<sup>2</sup>. Below is an example that uses the standard Fuzzy
 ARTMAP to approximate a sinusoidal function:
 
 ``` r
-library(rART)
 x = seq(0, 1, by = 0.001)
 y <- (sin(2*pi*x))^2
 fn <- cbind(x = x, y = y) # function to be approximated
@@ -175,10 +178,14 @@ TopoART stands for “Topology-learning ART”. It can learn the topology
 from the data by linking clusters together<sup>5</sup>. A TopoART
 network consists of two ART modules in series. Within each module, every
 learned category possesses a counter that counts the number of samples
-encoded by that category. A hyperparameter *ϕ* determines the minimum
-number of sample required for a category to become permanent. Every *τ*
-learning cycle, those categories containing samples fewer than *ϕ* will
-be removed. In the first module, those samples that belong to the
+encoded by that category. A hyperparameter
+![\\phi](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cphi "\phi")
+determines the minimum number of sample required for a category to
+become permanent. Every
+![\\tau](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Ctau "\tau")
+learning cycle, those categories containing samples fewer than
+![\\phi](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cphi "\phi")
+will be removed. In the first module, those samples that belong to the
 permanent categories will be retained and advanced to the second module
 where they will be further classified into finer categories. Thus, the
 second module learns a subset of the data that are filtered by the first
@@ -197,7 +204,6 @@ size in module 1. The user can specify which module to plot by entering
 the id number (0 for the first module and 1 for the second module).
 
 ``` r
-library(rART)
 # smiley face
 data(noisySmiley)
 topoart <- TopoART(rule = "fuzzy", dimension = 2, vigilance = 0.78, tau = 200, phi = 6)
