@@ -239,25 +239,8 @@ getTopoClustersCategories <- function(module){
 #' @return A list of dummy codes with the keys being the class labels and the values being the dummy (binary) codes.
 #' @export
 createDummyCodeMap <- function(classLabels){
-  if (is.factor(classLabels)){
-    classLabels <- as.character(classLabels)
-  }
-
-  l <- length(classLabels)
-  s <- seq(1, l)
-  code <- list()
-  if (is.numeric(classLabels)){
-    for (i in seq_along(classLabels)){
-      code[[as.character(classLabels[i])]] <- rep(0, l)
-      code[[as.character(classLabels[i])]][s[i]] <- 1
-    }
-  } else if (is.character(classLabels)){
-    for (i in seq_along(classLabels)){
-      code[[classLabels[i]]] <- rep(0, l)
-      code[[classLabels[i]]][s[i]] <- 1
-    }
-  }
-
+  classLabels <- as.character(classLabels)
+  code <- .createDummyCodeMap(as.character(classLabels))
   return (code)
 }
 
@@ -289,15 +272,7 @@ encodeLabel <- function(classLabels, dummyCode){
 #' @rdname createDummyCodeMap
 #' @export
 decode <- function(dummyClasses, dummyCode){
-  labels <- vector(mode = "numeric", length = nrow(dummyClasses))
-  for (i in seq_len(nrow(dummyClasses))){
-    for (j in seq_len(length(dummyCode))){
-      if (identical(dummyCode[[j]], dummyClasses[i,])){
-        labels[i] <- names(dummyCode)[j]
-        break
-      }
-    }
-  }
+  labels <- .decode(dummyClasses, dummyCode)
   return (labels)
 }
 
