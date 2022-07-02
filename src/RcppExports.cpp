@@ -145,13 +145,24 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// createDummyCodeMap
+List createDummyCodeMap(StringVector classLabels);
+RcppExport SEXP _rART_createDummyCodeMap(SEXP classLabelsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< StringVector >::type classLabels(classLabelsSEXP);
+    rcpp_result_gen = Rcpp::wrap(createDummyCodeMap(classLabels));
+    return rcpp_result_gen;
+END_RCPP
+}
 // encodeNumericLabel
-NumericMatrix encodeNumericLabel(NumericVector labels, List code);
+NumericMatrix encodeNumericLabel(IntegerVector labels, List code);
 RcppExport SEXP _rART_encodeNumericLabel(SEXP labelsSEXP, SEXP codeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type labels(labelsSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type labels(labelsSEXP);
     Rcpp::traits::input_parameter< List >::type code(codeSEXP);
     rcpp_result_gen = Rcpp::wrap(encodeNumericLabel(labels, code));
     return rcpp_result_gen;
@@ -169,6 +180,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// decode
+StringVector decode(NumericMatrix dummyClasses, List dummyCode);
+RcppExport SEXP _rART_decode(SEXP dummyClassesSEXP, SEXP dummyCodeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type dummyClasses(dummyClassesSEXP);
+    Rcpp::traits::input_parameter< List >::type dummyCode(dummyCodeSEXP);
+    rcpp_result_gen = Rcpp::wrap(decode(dummyClasses, dummyCode));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 RcppExport SEXP run_testthat_tests(SEXP);
 
@@ -183,8 +206,10 @@ static const R_CallMethodDef CallEntries[] = {
     {"_rART_topoTrain", (DL_FUNC) &_rART_topoTrain, 3},
     {"_rART_topoPredict", (DL_FUNC) &_rART_topoPredict, 3},
     {"_rART_linkClusters", (DL_FUNC) &_rART_linkClusters, 2},
+    {"_rART_createDummyCodeMap", (DL_FUNC) &_rART_createDummyCodeMap, 1},
     {"_rART_encodeNumericLabel", (DL_FUNC) &_rART_encodeNumericLabel, 2},
     {"_rART_encodeStringLabel", (DL_FUNC) &_rART_encodeStringLabel, 2},
+    {"_rART_decode", (DL_FUNC) &_rART_decode, 2},
     {"run_testthat_tests", (DL_FUNC) &run_testthat_tests, 1},
     {NULL, NULL, 0}
 };

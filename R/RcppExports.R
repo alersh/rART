@@ -41,11 +41,19 @@ linkClusters <- function(edges, nodes) {
     .Call('_rART_linkClusters', PACKAGE = 'rART', edges, nodes)
 }
 
+.createDummyCodeMap <- function(classLabels) {
+    .Call('_rART_createDummyCodeMap', PACKAGE = 'rART', classLabels)
+}
+
 .encodeNumericLabel <- function(labels, code) {
     .Call('_rART_encodeNumericLabel', PACKAGE = 'rART', labels, code)
 }
 
 .encodeStringLabel <- function(labels, code) {
     .Call('_rART_encodeStringLabel', PACKAGE = 'rART', labels, code)
+}
+
+.decode <- function(dummyClasses, dummyCode) {
+    .Call('_rART_decode', PACKAGE = 'rART', dummyClasses, dummyCode)
 }
 
