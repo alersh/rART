@@ -50,9 +50,9 @@ context("utilities") {
   }
   
   test_that("createDummyCodeMap"){
-    List code = List::create( _["1"] = IntegerVector::create(0,0),
-                              _["2"] = IntegerVector::create(1,0),
-                              _["3"] = IntegerVector::create(0,1) );
+    List code = List::create( _["1"] = IntegerVector::create(1,0,0),
+                              _["2"] = IntegerVector::create(0,1,0),
+                              _["3"] = IntegerVector::create(0,0,1) );
     StringVector v = StringVector::create("1","2","3");
     List test = createDummyCodeMap( v );
     expect_true( test.length() == code.length() );
@@ -68,10 +68,10 @@ context("utilities") {
   }
 
   test_that("encodeNumericLabel") {
-    IntegerVector v = IntegerVector::create(1,2,3,2,3,2,1);
+    IntegerVector v = IntegerVector::create(1,2,3,2,3,2);
     List code = createDummyCodeMap( StringVector::create( "1", "2", "3"));
-    IntegerVector actual = IntegerVector::create(0,1,0,1,0,1,0,0,0,1,0,1,0,0);
-    actual.attr("dim") = Dimension(7, 2);
+    IntegerVector actual = IntegerVector::create(1,0,0,0,0,0,0,1,0,1,0,1,0,0,1,0,1,0);
+    actual.attr("dim") = Dimension(6, 3);
     NumericMatrix actualm = as<NumericMatrix>(actual);
     NumericMatrix converted = encodeNumericLabel( v, code );
     int r = converted.rows();
