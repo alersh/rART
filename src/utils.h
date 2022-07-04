@@ -53,4 +53,7 @@ NumericMatrix encodeStringLabel( StringVector labels, List code );
 // convert the dummy codes to the original labels
 StringVector decode (NumericMatrix dummyClasses, List dummyCode);
 
+// check if two vectors are equal
+bool equal( NumericVector x, NumericVector y );
+
 void printVector( NumericVector v );

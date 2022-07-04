@@ -304,6 +304,22 @@ StringVector decode (NumericMatrix dummyClasses, List dummyCode){
   return labels;
 }
 
+// Check if two vectors are the same.
+bool equal( NumericVector x, NumericVector y ){
+  if ( x.length() != y.length() ){
+    stop( "The two vectors are not the same length." );
+  }
+  int l = x.length();
+  bool equal = true;
+  for ( int i = 0; i < l; i++ ){
+    if ( x[i] != y[i] ) {
+      equal = false;
+      break;
+    }
+  }
+  return equal;
+}
+
 void printVector( NumericVector v ){
   int l = v.length();
   for ( int i = 0; i < l; i++ ){
