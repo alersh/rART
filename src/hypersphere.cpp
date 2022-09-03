@@ -42,11 +42,6 @@ void Hypersphere::initR_bar( NumericMatrix x ){
     module.push_back( rbar, "R_bar" );
     ART::setModule( this->net, module );
   }
-  
-  //if ( isARTMAP( this->net ) ){
-  //  List module_ab = as<List>( this->net["mapfield"] )["ab"];
-  //module_ab.push_back( rbar, "R_bar" );
-  //}
 }
 
 double Hypersphere::norm( NumericVector x, NumericVector m ){
