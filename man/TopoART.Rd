@@ -2,12 +2,12 @@
 % Please edit documentation in R/ART.R
 \name{TopoART}
 \alias{TopoART}
-\title{Create a Topological ART Network}
+\title{ART}
 \usage{
 TopoART(
+  numModules = 2,
   rule = c("fuzzy", "hypersphere"),
   dimension,
-  numModules = 2,
   vigilance = 0.7,
   learningRate1 = 1,
   learningRate2 = 0.6,
@@ -17,11 +17,11 @@ TopoART(
 )
 }
 \arguments{
-\item{rule}{The activation / match / lerning rule to use. The choices available are fuzzy and hypersphere.}
+\item{numModules}{The number of modules in this network. It must be at least 2.}
+
+\item{rule}{The activation / match / lerning rule to use. The choices available are fuzzy.}
 
 \item{dimension}{The number of dimension/features in the data}
-
-\item{numModules}{The number of TopoART modules. The default is 2.}
 
 \item{vigilance}{The vigilance parameter. Must be between 0 and 1.}
 
@@ -34,9 +34,6 @@ TopoART(
 \item{phi}{The count threshold. The F2 neuron is kept when the count >= phi, removed when the count < phi.}
 
 \item{maxEpochs}{The maximum number of epochs. Default is 20.}
-}
-\value{
-TopoART returns a TopoART object.
 }
 \description{
 Create a new TopoART object

@@ -7,79 +7,60 @@
 
 
 #include <Rcpp.h>
+#include "IModel.h"
 using namespace Rcpp;
 using namespace std;
 
+#ifndef ARTMAP_H
+#define ARTMAP_H
 
-List newARTMAP ( int dimension, double vigilance = 0.75, double learningRate = 1.0, int categorySize = 200, int maxEpochs = 20, bool simplified = false );
+List newARTMAP ( int dimension, int num = 1, double vigilance = 0.75, double learningRate = 1.0, int categorySize = 100, int maxEpochs = 20, bool simplified = false );
 bool isARTMAP ( List net );
-bool isSimplified( List net );
 
 namespace ARTMAP{
-
+  List mapfield ( int id, double vigilance = 0.75, double learningRate = 1.0, int categorySize = 50, bool simplified = false );
   namespace simplified{
-
-    void newCategory( List net, int label );
-    int learn ( List net,
+  bool isSimplified( List net );
+    void newCategory( List mapfield, int label );
+    int learn ( IModel &model,
                 NumericVector d,
-                int label,
-                std::function< double( List, NumericVector, NumericVector ) > activationFun,
-                std::function< double( List, NumericVector, NumericVector ) > matchFun,
-                std::function< NumericVector( List, NumericVector, NumericVector ) > weightUpdateFun );
-    List classify( List net,
+                int label );
+    List classify( IModel &model,
                    NumericVector d,
-                   std::function< double( List, NumericVector, NumericVector ) > activationFun,
-                   std::function< double( List, NumericVector, NumericVector ) > matchFun,
-                   bool test );
+                   bool test = false );
     int test( int predicted, int label );
-
+  
   }
 
   namespace standard{
-
-    int mapfieldUpdate( List net, int nodeIndex_a, int nodeIndex_b, std::function< NumericVector( List, NumericVector, NumericVector ) > fun );
-
-    int learn ( List net,
+  
+    int mapfieldUpdate( IModel &model, List mapfield, int nodeIndex_a, int nodeIndex_b );
+    
+    int learn ( IModel &model,
                 NumericVector d,
-                NumericVector label,
-                std::function< double( List, NumericVector, NumericVector ) > activationFun,
-                std::function< double( List, NumericVector, NumericVector ) > matchFun,
-                std::function< NumericVector( List, NumericVector, NumericVector ) > weightUpdateFun,
-                std::function< NumericVector( List, NumericVector, NumericVector ) > mapfieldUpdateFun );
-    int test( List net,
-              NumericVector label,
-              std::function< double( List, NumericVector, NumericVector ) > activationFun,
-              std::function< double( List, NumericVector, NumericVector ) > matchFun ) ;
-
-    List classify( List net,
+                NumericVector label );
+    int test( IModel &model, 
+              NumericVector label ) ;
+    
+    List classify( IModel &model,
                    NumericVector d,
-                   std::function< double( List, NumericVector, NumericVector ) > activationFun,
-                   std::function< double( List, NumericVector, NumericVector ) > matchFun,
                    bool test = false );
   }
 
-  void train( List net,
+  void train( IModel &model,
               NumericMatrix x,
               Nullable< NumericVector > vTarget,
-              Nullable< NumericMatrix > mTarget,
-              std::function< NumericVector( NumericVector ) > codeFun,
-              std::function< double( List, NumericVector, NumericVector ) > activationFun,
-              std::function< double( List, NumericVector, NumericVector ) > matchFun,
-              std::function< NumericVector( List, NumericVector, NumericVector ) > weightUpdateFun,
-              std::function< NumericVector( List, NumericVector, NumericVector ) > mapfieldUpdateFun );
-
- List predict( List net,
-               NumericMatrix x,
-               Nullable< NumericVector > vTarget,
-               Nullable< NumericMatrix > mTarget,
-               std::function< NumericVector( NumericVector ) > codeFun,
-               std::function< NumericVector( NumericVector ) > uncodeFun,
-               std::function< double( List, NumericVector, NumericVector ) > activationFun,
-               std::function< double( List, NumericVector, NumericVector ) > matchFun,
-               bool test = false );
+              Nullable< NumericMatrix > mTarget );
+  
+  List predict( IModel &model,
+                NumericMatrix x,
+                Nullable< NumericVector > vTarget,
+                Nullable< NumericMatrix > mTarget,
+                bool test = false );
 }
+
 void trainARTMAP ( List net, NumericMatrix x, Nullable< NumericVector > vTarget = R_NilValue, Nullable< NumericMatrix > mTarget = R_NilValue );
 
 List predictARTMAP ( List net, NumericMatrix x, Nullable< NumericVector > vTarget = R_NilValue, Nullable< NumericMatrix > mTarget = R_NilValue, bool test = false );
 
-
+#endif

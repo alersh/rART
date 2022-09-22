@@ -18,83 +18,62 @@
 
 #include <Rcpp.h>
 #include "ART.h"
-#include "ARTMAP.h"
-#include "TopoART.h"
 #include "utils.h"
 using namespace Rcpp;
 using namespace std;
-
+#include "fuzzy.h"
 
 bool isFuzzy ( List net ){
   return as<string>( net.attr( "rule" ) ).compare( "fuzzy" ) == 0;
 }
 
-namespace Fuzzy {
+Fuzzy::Fuzzy( List net ) : IModel( net ){}
 
-  double activation( List module, NumericVector x, NumericVector w ){
-    return sum( na_omit( pmin( x, w ) ) )/( as<double>( module["alpha"] ) + sum( na_omit( w ) ) );
-  }
-
-  double TopoPredictActivation ( List module, NumericVector x, NumericVector w ){
-    double a = 1 - sum( na_omit( pmin( x, w ) - w ) )/as<int>( module["dimension"] );
-    return a;
-  }
-
-  double match( List module, NumericVector x, NumericVector w ){
-    return sum( na_omit( pmin( x, w ) ) )/sum( na_omit( x ) );
-  }
-
-  NumericVector weightUpdate( List module, NumericVector x, NumericVector w ){
-    double b = as<double>( module["beta"] );
-
-    NumericVector p = b * pmin( x, w ) + ( 1.0 - b ) * w;
-    return p;
-  }
-
-  void trainART( List net, NumericMatrix x ){
-    int numModules = as<int>( net["numModules"] );
-    for ( int i = 0; i < numModules; i++ ){
-      initWeight( as<List>( net["module"] )[i], true );
-    }
-    if ( isART( net ) ){
-      ART::train( net, x, complementCode, activation, match, weightUpdate );
-    }
-    else if ( isTopoART( net ) ){
-      Topo::train( net, x, complementCode, activation, match, weightUpdate );
-    }
-
-  }
-
-  void trainARTMAP( List net, NumericMatrix x, Nullable< NumericVector > vTarget = R_NilValue, Nullable< NumericMatrix > mTarget = R_NilValue ){
-    int numModules = as<int>( net["numModules"] );
-    for ( int i = 0; i < numModules; i++ ){
-      initWeight( as<List>( net["module"] )[i], true );
-    }
-    if ( isARTMAP( net ) ){
-      ARTMAP::train( net, x, vTarget, mTarget, complementCode, activation, match, weightUpdate, weightUpdate );
-    }
-
-  }
-
-  List predictART( List net, int id, NumericMatrix x ){
-    List results;
-    if ( isART( net ) ){
-      results = ART::predict ( net, id, x, complementCode, activation, match );
-    }
-    else if ( isTopoART( net ) ){
-      results = Topo::predict( net, id, x, complementCode, TopoPredictActivation, match );
-    }
-    return results;
-  }
-
-  List predictARTMAP( List net, NumericMatrix x, Nullable< NumericVector > vTarget, Nullable< NumericMatrix > mTarget = R_NilValue, bool test = false ){
-    List results;
-    if ( isARTMAP( net ) ){
-      results = ARTMAP::predict ( net, x, vTarget, mTarget, complementCode, uncomplementCode, activation, match, test );
-    }
-    return results;
-  }
-
+int Fuzzy::getWeightDimension( int featureDimension ){
+  return featureDimension * 2;
 }
 
+NumericVector Fuzzy::newWeight( NumericVector x ){
+  return x;
+}
+
+double Fuzzy::activation( List module, NumericVector x, NumericVector w ) {
+  
+  return sum( na_omit( pmin( x, w ) ) )/( ART::getAlpha( module ) + sum( na_omit( w ) ) );
+}
+
+double Fuzzy::TopoPredictActivation ( List module, NumericVector x, NumericVector w ) {
+  
+  double a = 1 - sum( na_omit( pmin( x, w ) - w ) )/ART::getDimension( module );
+  return a;
+}
+
+double Fuzzy::match( List module, NumericVector x, NumericVector w )  {
+  
+  return sum( na_omit( pmin( x, w ) ) )/sum( na_omit( x ) );
+}
+
+NumericVector Fuzzy::weightUpdate( List module, double learningRate, NumericVector x, NumericVector w ) {
+  return learningRate * pmin( x, w ) + ( 1.0 - learningRate ) * w;
+  
+}
+
+// complementCode: Create complement code
+NumericVector Fuzzy::processCode( NumericVector x )  {
+  int s = x.size();
+  NumericVector c( s*2 );
+  for ( int i = 0; i < s; i++ ){
+    c[i] = x[i];
+    c[i+s] = 1 - x[i];
+  }
+  return c;
+}
+
+NumericVector Fuzzy::unProcessCode( NumericVector x ){
+  int l = x.length();
+  // the length must be even
+  if ( l % 2 != 0 )
+    stop( "The length of the code must be an even number." );
+  return x[ Range( 0, l/2 - 1 ) ];
+}
 

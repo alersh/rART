@@ -19,101 +19,136 @@ bool isARTMAP ( List net ){
   return as<string>( net.attr( "class" ) ).compare( "ARTMAP" ) == 0;
 }
 
-bool isSimplified( List net ){
-  return as<bool>( net.attr( "simplified" ) );
-}
-
 namespace ARTMAP {
+
   // create and return a mapfield module
-  List mapfield ( int id, int dimension, double vigilance = 0.75, double learningRate = 1.0, bool simplified = false ){
-    List module;
-    NumericMatrix w;
-    if ( !simplified ){
-      module = List::create( _["id"] = id,                   // number of category to create when the module runs out of categories to match
-                             _["dimension"] = dimension,     // number of features
-                             _["a_size"] = 0,                // number of categories from ART a
-                             _["b_size"] = 0,                // number of categories from ART b
-                             _["epsilon"] = 0.000001,        // match function parameter
-                             _["w"] = w,                     // map field weights
-                             _["rho"] = vigilance,           // vigilance parameter
-                             _["beta"] = learningRate,       // learning parameter
-                             _["Jmax"] = -1                  // the node index with the highest activation and the best match
-      );
+  List mapfield ( int id, double vigilance = 0.75, double learningRate = 1.0, int categorySize = 50, bool simplified = false ){
+    
+    IntegerVector change;
+    
+    List module = List::create( _["id"] = id,                   // module id
+                                _["weightDimension"] = 0      , // the number of dimensions in the weight
+                                _["capacity"] = categorySize,   // number of category to create when the module runs out of categories to match
+                                _["alpha"] = 0.001,             // activation function parameter
+                                _["epsilon"] = 0.000001,        // match function parameter
+                                _["rho"] = vigilance,           // vigilance parameter
+                                _["beta"] = learningRate,       // learning parameter
+                                _["change"] = change            // keep track of the number of changes in the mapfield
+    );
+    
+    if ( simplified ){
+      IntegerVector w;
+      module.push_back( w, "w" );
+      module.push_back( 0, "numCategories" );
     }
     else{
-      module = List::create( _["id"] = id,                   // number of category to create when the module runs out of categories to match
-                             _["dimension"] = dimension,     // number of features
-                             _["numMapfield"] = 0,           // number of categories in the mapfield
-                             _["w"] = w,                     // map field weights
-                             _["rho"] = vigilance,           // vigilance parameter
-                             _["beta"] = learningRate        // learning parameter
-      );
+      NumericMatrix w;
+      module.push_back( w, "w" );
+      module.push_back( 0, "numCategories_a" );
+      module.push_back( 0, "numCategories_b" );
     }
+    
     return module;
   }
 
+  bool isSimplified( List net ){
+    return as<bool>( net.attr( "simplified" ) );
+  }
+
+  List getMapfield ( List net ){
+    return net["mapfield"];
+  }
+  
+  List getModule_a( List net ){
+    return as<List>( net["module"] )["a"];
+  }
+  
+  List getModule_b( List net ){
+    return as<List>( net["module"] )["b"];
+  }
+
   namespace simplified {
-
-    void newCategory( List module_ab, int label ){
-
-      IntegerVector m = as<IntegerVector>( module_ab["w"] );
-      m.push_back( label );
-      module_ab["w"] = m;
-      module_ab["numMapfield"] = as<int>( module_ab["numMapfield"] ) + 1;
-
+  
+    int getWeight( List mapfield, int index ){
+      return as<IntegerVector>( mapfield["w"] )[index];
     }
-
-    int learn ( List net,
-                NumericVector d,
-                int label,
-                std::function< double( List, NumericVector, NumericVector ) > activationFun,
-                std::function< double( List, NumericVector, NumericVector ) > matchFun,
-                std::function< NumericVector( List, NumericVector, NumericVector ) > weightUpdateFun ){
-      List module = as<List>( net["module"] )["a"];
-      List module_ab = as<List>( net["mapfield"] )["ab"];
-
-      int change = 0;
-
-      int nc = module["numCategories"];
+    
+    void setWeight( List mapfield, int index, int w ){
+      IntegerVector v = mapfield["w"];
+      v( index ) = w;
+    }
+    
+    IntegerVector getWeightVector( List mapfield ){
+      return mapfield["w"];
+    }
+    
+    void setWeightVector( List mapfield, IntegerVector v ){
+      mapfield["w"] = v;
+    }
+    
+    void newCategory( List mapfield, int label ){
+      int numCategories = ART::getNumCategories( mapfield );
+      int newCategoryIndex = numCategories;
+      IntegerVector wm = getWeightVector( mapfield );
+      if ( numCategories == wm.length() ){
+        // reached the max capacity, so add more rows
+        IntegerVector newWeight = appendVector( wm, ART::getCapacity( mapfield ) );
+        setWeightVector( mapfield, newWeight );
+        
+        IntegerVector c = appendVector( ART::getChangeVector( mapfield ), ART::getCapacity( mapfield ) );
+        ART::setChangeVector( mapfield, c );
+      }
+      setWeight( mapfield, newCategoryIndex, label );
+      ART::incChange( mapfield, newCategoryIndex );
+      ART::setNumCategories( mapfield, numCategories + 1 );
+      
+    }
+    void initMapfield( List mapfield ){
+      int size = ART::getCapacity( mapfield );
+      
+      IntegerVector w( size );
+      setWeightVector( mapfield, w );
+      
+      IntegerVector c(size);
+      ART::setChangeVector( mapfield, c );
+    }
+    
+    void learn ( IModel &model, NumericVector d, int label){
+      List module = ART::getModule( model.net, 0 );
+      List mapfield = getMapfield( model.net );
+      
+      int nc = ART::getNumCategories( module );
       if ( nc == 0 ){
-
-        ART::newCategory( module, d );
-        newCategory( module_ab, label );
-        change++;
-
+        
+        ART::newCategory( model, module, d );
+        newCategory( mapfield, label );
+        
       }
       else{
-        NumericVector a = ART::activation( module, d, activationFun );
+        NumericVector a = ART::activation( model, module, d );
         NumericVector T_j = sortIndex( a );
         bool resonance = false;
         int j = 0;
-        double rho = module["rho"];
+        double rho = ART::getRho( module );
         while( !resonance ){
           int J_max = T_j( j );
-
-          double m = ART::match( module, d, J_max, matchFun );
-          NumericMatrix w_a = module["w"];
-
+          
+          double m = ART::match( model, module, J_max, d );
+          
           if ( m >= rho ){
-
-            NumericVector mapfield = module_ab["w"];
-
-            if ( mapfield[J_max] == label ){
-              module["Jmax"] = J_max;
-              change += ART::weightUpdate( module, d, J_max, weightUpdateFun );
+            if ( getWeight( mapfield, J_max ) == label ){
+              ART::setJmax( module, J_max );
+              ART::weightUpdate( model, module, J_max, d );
+              ART::counterUpdate( module, J_max );
               resonance = true;
             }
             else{
-
-              rho = std::min( m + as<double>( module["epsilon"] ), 1.0 );
-
-              if ( j == as<int>( module["numCategories"] ) - 1 ){
-                module["Jmax"] = j + 1;
-                ART::newCategory( module, d );
-
-                newCategory( module_ab, label );
-
-                change++;
+              rho = std::min( m + ART::getEpsilon( module ), 1.0 );
+              
+              if ( j == ART::getNumCategories( module ) - 1 ){
+                ART::setJmax( module, j + 1 );
+                ART::newCategory( model, module, d );
+                newCategory( mapfield, label );
                 resonance = true;
               }
               else{
@@ -122,12 +157,10 @@ namespace ARTMAP {
             } // mapfield == label
           } // match >= rho_a
           else{
-            if ( j == as<int>( module["numCategories"] ) - 1 ){
-              module["Jmax"] = j + 1;
-              ART::newCategory( module, d );
-
-              newCategory( module_ab, label );
-              change++;
+            if ( j == ART::getNumCategories( module ) - 1 ){
+              ART::setJmax( module, j + 1 );
+              ART::newCategory( model, module, d );
+              newCategory( mapfield, label );
               resonance = true;
             }
             else{
@@ -136,58 +169,47 @@ namespace ARTMAP {
           } // match fails
         } // while resonance
       } // if
-
-      return change;
+      
     }
-
+    
     int test( int predicted, int label ){
       int matched = NA_INTEGER;
-
-      if ( predicted == label ){
-        matched = 1;
-      }
-      else{
-        matched = 0;
-      }
+      matched = predicted == label? 1 : 0;
+      
       return matched;
     }
-
+    
     // simplified classification
-    List classify( List net,
-                   NumericVector d,
-                   std::function< double( List, NumericVector, NumericVector ) > activationFun,
-                   std::function< double( List, NumericVector, NumericVector ) > matchFun,
-                   bool test ){
-
-      List module = as<List>( net["module"] )["a"];
-      List module_ab = as<List>( net["mapfield"] )["ab"];
+    List classify( IModel &model, NumericVector d ){
+      
+      List module = getModule_a( model.net );
+      List mapfield = getMapfield( model.net );
       int category = NA_INTEGER;
       int predicted = NA_INTEGER;
-
-      IntegerVector mapfield = module_ab["w"];
-      int nc = as<int>( module["numCategories"] );
-
-      NumericVector a = ART::activation( module, d, activationFun );
+      
+      int nc = ART::getNumCategories( module );
+      
+      NumericVector a = ART::activation( model, module, d );
       NumericVector T_j = sortIndex( a );
       bool resonance = false;
       int j = 0;
-      double rho = module["rho"];
+      double rho = ART::getRho( module );
       while( !resonance ){
         int J_max = T_j( j );
-
-        double m = ART::match( module, d, J_max, matchFun );
-
+        
+        double m = ART::match( model, module, J_max, d );
+        
         if ( m >= rho ){
-
+          
           category = J_max;
-          predicted = mapfield[J_max];
+          predicted = getWeight( mapfield, J_max );
           resonance = true;
-
+          
         } // match >= rho_a
         else{
           if ( j == nc - 1 ){
             // can't find a match
-            module["Jmax"] = NA_INTEGER;
+            ART::setJmax( module, NA_INTEGER );
             resonance = true;
           }
           else{
@@ -196,14 +218,20 @@ namespace ARTMAP {
           } // if
         } // match fails
       } // while resonance
-
+      
       return ( List::create( _["category_a"] = category,
                              _["predicted"] = predicted ) );
+    }
+  
+    void subsetMapfield( List mapfield ){
+      int numCategories = ART::getNumCategories( mapfield );
+      setWeightVector( mapfield, subsetVector( getWeightVector( mapfield ), numCategories ) );
+      ART::setChangeVector( mapfield, subsetVector( ART::getChangeVector( mapfield ), numCategories ) );
     }
   }
 
   namespace standard {
-    // recall reactivates the F2b node based on the mapfield weights to retrieve its F1b pattern
+  // recall reactivates the F2b node based on the mapfield weights to retrieve its F1b pattern
     NumericVector recall( List module_b, NumericVector mapfield ){
       // find which mapfield node is active (either 1 or 0)
       int l = mapfield.length();
@@ -214,159 +242,186 @@ namespace ARTMAP {
           break;
         }
       }
-
+      
       NumericVector F1;
       if ( nodeIndex_b == -1 ){
-        F1( as<NumericMatrix>( module_b["w"] ).cols() );
+        F1( ART::getWeightMatrix( module_b ).cols() );
         // Can't find the node b in F2. Something is wrong. Return all NA
         F1.fill( NA_INTEGER );
         return F1;
       }
-      F1 = as<NumericMatrix>( module_b["w"] )( nodeIndex_b, _ );
+      F1 = ART::getWeight( module_b, nodeIndex_b ); 
+      
       return F1;
     }
-
-    double match( List module_ab, int nodeIndex_a, int nodeIndex_b, std::function< double( List, NumericVector, NumericVector ) > fun ){
-      NumericMatrix w_ab = module_ab["w"];
-      NumericVector w_a = w_ab( nodeIndex_a, _ );
-
+    
+    double match( IModel &model, List mapfield, int nodeIndex_a, int nodeIndex_b ){
+      NumericVector w_a = ART::getWeight( mapfield, nodeIndex_a );
       NumericVector yb( w_a.length(), 0 );
-
       yb( nodeIndex_b ) = 1;
-      double a = fun( module_ab, yb, w_a );
-
+      
+      double a = model.match( mapfield, yb, w_a );
       return a;
     }
-
-    int mapfieldUpdate( List module_ab, int nodeIndex_a, int nodeIndex_b, std::function< NumericVector( List, NumericVector, NumericVector ) > fun ){
-      int change = 0;
-      NumericMatrix w_ab = module_ab["w"];
-      NumericVector w_a = w_ab( nodeIndex_a, _ );
-
-      // activate y_b
+    
+    void mapfieldUpdate( IModel &model, List mapfield, int nodeIndex_a, int nodeIndex_b ){
+      NumericVector w_a = ART::getWeight( mapfield, nodeIndex_a );
       NumericVector y_b( w_a.length(), 0 );
       y_b( nodeIndex_b ) = 1;
-      // no new F2 node has been added in modules a and b
-      w_ab( nodeIndex_a, _ ) = fun( module_ab, y_b, w_a );
-      module_ab["w"] = w_ab;
-
-      return change++;
+      ART::weightUpdate( model, mapfield, nodeIndex_a, y_b );
+      
     }
-
-    void newCategory_a( List module_ab ){
-      NumericMatrix w = module_ab["w"];
-      int rows = w.rows();
-      int cols = w.cols();
-      NumericMatrix wnew( rows + 1, cols );
-      // add a new column
-      for ( int r = 0; r < rows; r++ ){
-        for ( int c = 0; c < cols; c++ ){
-          wnew( r,c ) = w( r,c );
-        }
-      }
-      for ( int c = 0; c < cols; c++ ){
-        // uncommitted weights are all set to 1
-        wnew( rows, c ) = 1;
-
-      }
-      module_ab["w"] = wnew;
-      module_ab["a_size"] = rows + 1;
+    
+    void setNumCategories_a( List mapfield, int x ){
+      mapfield["numCategories_a"] = x;
     }
-
-    void newCategory_b( List module_ab ){
-      NumericMatrix w = module_ab["w"];
-      int rows = w.rows();
-      int cols = w.cols();
-      NumericMatrix wnew( rows, cols + 1 );
-      // add a new column
-      for ( int r = 0; r < rows; r++ ){
-        for ( int c = 0; c < cols; c++ ){
-          wnew( r,c ) = w( r,c );
-        }
-        wnew( r, cols ) = 0;
-      }
-      // set the new node to 1
-      wnew( rows - 1, cols ) = 0;
-      module_ab["w"] = wnew;
-      module_ab["b_size"] = cols + 1;
+    
+    void setNumCategories_b( List mapfield, int x ){
+      mapfield["numCategories_b"] = x;
     }
-
-    int learn ( List net,
-                NumericVector d,
-                NumericVector label,
-                std::function< double( List, NumericVector, NumericVector ) > activationFun,
-                std::function< double( List, NumericVector, NumericVector ) > matchFun,
-                std::function< NumericVector( List, NumericVector, NumericVector ) > weightUpdateFun,
-                std::function< NumericVector( List, NumericVector, NumericVector ) > mapfieldUpdateFun ){
-      int change = 0;
-      List module_a = as<List>( net["module"] )["a"];
-      List module_b = as<List>( net["module"] )["b"];
-      List module_ab = as<List>( net["mapfield"] )["ab"];
-
-      // init
-      int nc_a = module_a["numCategories"];
-      int nc_b = module_b["numCategories"];
-      int nc_ab_a = module_ab["a_size"];
-      int nc_ab_b = module_ab["b_size"];
-      if ( nc_a == 0  && nc_b == 0  && nc_ab_a == 0 && nc_ab_b == 0 ){
-
-        ART::newCategory( module_a, d );
-        ART::newCategory( module_b, label );
-        // Add new category in b first before a
-        newCategory_b( module_ab );
-        newCategory_a( module_ab );
-        change += mapfieldUpdate( module_ab, 0, 0, mapfieldUpdateFun );
-
+    
+    int getNumCategories_a( List mapfield ){
+      return mapfield["numCategories_a"];
+    }
+    
+    int getNumCategories_b( List mapfield ){
+      return mapfield["numCategories_b"];
+    }
+    
+    List getModule_a( List net ){
+      return as<List>( net["module"] )["a"];
+    }
+    
+    List getModule_b( List net ){
+      return as<List>( net["module"] )["b"];
+    }
+    
+    List getMapfield( List net ){
+      return net["mapfield"];
+    }
+  
+    void newCategory_a( List mapfield ){
+      
+      int numCategories = getNumCategories_a( mapfield );
+      int newCategoryIndex = numCategories;
+      NumericMatrix wm = ART::getWeightMatrix( mapfield );
+      NumericMatrix newWeight;
+      if ( numCategories == wm.rows() ){
+        // reached the max capacity, so add more rows
+        newWeight = appendRows( wm, ART::getCapacity( mapfield ) );
+        ART::setWeightMatrix( mapfield, newWeight );
+        
+        IntegerVector c = appendVector( ART::getChangeVector( mapfield ), ART::getCapacity( mapfield ) );
+        ART::setChangeVector( mapfield, c );
       }
       else{
-        change += ART::learn( net, module_b["id"], label, activationFun, matchFun, weightUpdateFun );
+        newWeight = wm;
+      }
+      
+      ART::setWeight( mapfield, newCategoryIndex, rep( 1.0, wm.cols() ) );
+      ART::incChange( mapfield, newCategoryIndex );
+      setNumCategories_a( mapfield, numCategories + 1 );
+      
+    }
+    
+    void newCategory_b( List mapfield ){
+      
+      int numCategories = getNumCategories_b( mapfield );
+      int newCategoryIndex = numCategories;
+      NumericMatrix wm = ART::getWeightMatrix( mapfield );
+      NumericMatrix newWeight;
+      if ( numCategories == wm.cols() ){
+        // reached the max capacity, so add more columns
+        newWeight = appendColumns( wm, ART::getCapacity( mapfield ) );
+      }
+      else{
+        newWeight = wm;
+      }
+      newWeight( wm.rows() - 1, newCategoryIndex ) = 0;
+      ART::setWeightMatrix( mapfield, newWeight );
+      ART::setWeightDimension( mapfield, numCategories + 1 );
+      setNumCategories_b( mapfield, numCategories + 1 );
+    }
+  
+    void initMapfield( List mapfield ){
+      int size = ART::getCapacity( mapfield );
+      
+      NumericMatrix w( 1, size );
+      ART::setWeightMatrix( mapfield, w );
+      
+      IntegerVector c( size );
+      ART::setChangeVector( mapfield, c );
+    }
+  
+    void learn ( IModel &model, NumericVector d, NumericVector label ){
+   
+      List module_a = getModule_a( model.net );
+      List module_b = getModule_b( model.net );
+      List mapfield = getMapfield( model.net );
+      
+      // init
+      int nc_a = ART::getNumCategories( module_a );
+      int nc_b = ART::getNumCategories( module_b );
+      int nc_ab_a = getNumCategories_a( mapfield );
+      int nc_ab_b = getNumCategories_b( mapfield );
+      if ( nc_a == 0  && nc_b == 0  && nc_ab_a == 0 && nc_ab_b == 0 ){
+        
+        ART::newCategory( model, module_a, d );
+        ART::newCategory( model, module_b, label );
+        // Add new category in b first before a
+        newCategory_b( mapfield );
+        newCategory_a( mapfield );
+        mapfieldUpdate( model, mapfield, 0, 0 );
+        
+      }
+      else{
+        ART::learn( model, ART::getID( module_b ), label );
         // add a new ab category whenever a new category is added in F2b
-        if ( as<int>( module_b["numCategories"] ) > as<int>( module_ab["b_size"] ) ){
+        if ( ART::getNumCategories( module_b ) > getNumCategories_b( mapfield ) ){
           // update nodes in mapfield
-          newCategory_b( module_ab );
-
-          change++;
+          newCategory_b( mapfield );
         }
         // get ART a F2 activations
-        NumericVector a = ART::activation( module_a, d, activationFun );
+        NumericVector a = ART::activation( model, module_a, d );
         NumericVector T_j = sortIndex( a );
         bool resonance = false;
         int j = 0;
-        double rho_a = module_a["rho"];
+        double rho_a = ART::getRho( module_a );
         while( !resonance ){
           int Jmax_a = T_j( j );
-
-          double m = ART::match( module_a, d, Jmax_a, matchFun );
-
+          
+          double m = ART::match( model, module_a, Jmax_a, d );
+          
           if ( m >= rho_a ){
             // check the mapfield
-
-            double m_ab = match( module_ab, Jmax_a, module_b["Jmax"], matchFun );
-
-            if ( m_ab >= as<double>( module_ab["rho"] ) ){
-              module_a["Jmax"] = Jmax_a;
-              change += ART::weightUpdate( module_a, d, Jmax_a, weightUpdateFun );
-              change += mapfieldUpdate( module_ab, Jmax_a, module_b["Jmax"], mapfieldUpdateFun );
-
+            
+            double m_ab = match( model, mapfield, Jmax_a, ART::getJmax( module_b ) );
+            
+            if ( m_ab >= ART::getRho( mapfield ) ){
+              ART::setJmax( module_a, Jmax_a );
+              ART::weightUpdate( model, module_a, Jmax_a, d );
+              ART::counterUpdate( module_a, Jmax_a );
+              mapfieldUpdate( model, mapfield, Jmax_a, ART::getJmax( module_b ) );
+              
               resonance = true;
             }
-
+            
             if ( !resonance ){
-
-              rho_a = std::min( m + as<double>( module_a["epsilon"] ), 1.0 );
-
+              
+              rho_a = std::min( m + ART::getEpsilon( module_a ), 1.0 );
+              
               // if run out of categories, then add a new one
-              if ( j == as<int>( module_a["numCategories"] ) - 1 ){
+              if ( j == ART::getNumCategories( module_a ) - 1 ){
                 j++;
-                module_a["Jmax"] = j;
-
+                ART::setJmax( module_a, j );
+                
                 // add a new F2 node in ART a
-                ART::newCategory( module_a, d );
-
+                ART::newCategory( model, module_a, d );
+                
                 // add a new node in ART ab
-                newCategory_a( module_ab );
-                change += mapfieldUpdate( module_ab, j, module_b["Jmax"], mapfieldUpdateFun );
-
+                newCategory_a( mapfield );
+                mapfieldUpdate( model, mapfield, j, ART::getJmax( module_b ) );
+                
                 resonance = true;
               }
               else{
@@ -375,18 +430,18 @@ namespace ARTMAP {
             } // resonance
           }
           else{
-            if ( j == as<int>( module_a["numCategories"] ) - 1 ){
+            if ( j == ART::getNumCategories( module_a ) - 1 ){
               j++;
-              module_a["Jmax"] = j;
-              ART::newCategory( module_a, d );
-
+              ART::setJmax( module_a, j );
+              ART::newCategory( model, module_a, d );
+              
               // add a new node in ART ab
-              newCategory_a( module_ab );
-
-              change += mapfieldUpdate( module_ab, j, module_b["Jmax"], mapfieldUpdateFun );
-
+              newCategory_a( mapfield );
+              
+              mapfieldUpdate( model, mapfield, j, ART::getJmax( module_b ) );
+              
               resonance = true;
-
+              
             }
             else{
               j++;
@@ -394,82 +449,66 @@ namespace ARTMAP {
           } // match fails
         } // while resonance
       } // if
-
-      return change;
+      
     }
-
-    int test( List net,
-              NumericVector label,
-              std::function< double( List, NumericVector, NumericVector ) > activationFun,
-              std::function< double( List, NumericVector, NumericVector ) > matchFun ) {
-
+    
+    int test( IModel &model, NumericVector label ) {
+      
       int matched = NA_INTEGER;
-
-      List module_ab = as<List>( net["mapfield"] )["ab"];
-      List module_a = as<List>( net["module"] )["a"];
-      List module_b = as<List>( net["module"] )["b"];
-
-      int category_b = ART::classify( net, module_b["id"], label, activationFun, matchFun );
-
-      int Jmax_a = module_a["Jmax"];
-
+      
+      List mapfield = getMapfield( model.net );
+      List module_a = getModule_a( model.net );
+      List module_b = getModule_b( model.net );
+      
+      int category_b = ART::classify( model, ART::getID( module_b ), label );
+      
+      int Jmax_a = ART::getJmax( module_a );
+      
       if ( category_b != NA_INTEGER && Jmax_a != NA_INTEGER ){
-        double m_ab = match( module_ab, Jmax_a, category_b, matchFun );
-
-        if ( m_ab >= as<double>( module_ab["rho"] ) ){
-          matched = 1;
-        }
-        else{
-          matched = 0;
-        }
+        double m_ab = match( model, mapfield, Jmax_a, category_b );
+        matched = m_ab >= ART::getRho( mapfield ) ? 1 : 0;
       }
-
+      
       return matched;
     }
-
-    List classify( List net,
-                   NumericVector d,
-                   std::function< double( List, NumericVector, NumericVector ) > activationFun,
-                   std::function< double( List, NumericVector, NumericVector ) > matchFun,
-                   bool test = false ){
-
-      List module_a = as<List>( net["module"] )["a"];
-      List module_ab = as<List>( net["mapfield"] )["ab"];
-      List module_b = as<List>( net["module"] )["b"];
-
+    
+    List classify( IModel &model, NumericVector d ){
+      
+      List mapfield = getMapfield( model.net );
+      List module_a = getModule_a( model.net );
+      List module_b = getModule_b( model.net );
+      
       // best matching node in F2a
       int category_a = NA_INTEGER;
-
-      NumericVector predicted( as<int>( module_ab["b_size"] ), NA_REAL );
-      NumericVector F1_b( as<NumericMatrix>( module_b["w"] ).cols(), NA_REAL );
-
-      int matched = NA_INTEGER;
-
-      NumericVector a = ART::activation( module_a, d, activationFun );
+      
+      NumericVector predicted( getNumCategories_b( mapfield ), NA_REAL );
+      NumericVector F1_b( ART::getWeightMatrix( module_b ).cols(), NA_REAL );
+      
+      NumericVector a = ART::activation( model, module_a, d );
       NumericVector T_j = sortIndex( a );
       bool resonance = false;
       int j = 0;
-      double rho_a = module_a["rho"];
+      double rho_a = ART::getRho( module_a );
       while( !resonance ){
         int Jmax_a = T_j( j );
-        double m = ART::match( module_a, d, Jmax_a, matchFun );
-
+        double m = ART::match( model, module_a, Jmax_a, d );
+        
         if ( m >= rho_a ){
           // prediction
           category_a = Jmax_a;
-          module_a["Jmax"] = Jmax_a;
-          predicted = as<NumericMatrix>( module_ab["w"] )( Jmax_a, _ );
+          ART::setJmax( module_a, Jmax_a );
+          predicted = ART::getWeight( mapfield, Jmax_a );
           F1_b = recall( module_b, predicted );
-
+          
           resonance = true;
         }
         else {
           // raise the vigilance of a and continue with the search
-          rho_a = std::min( rho_a + as<double>( module_a["epsilon"] ), 1.0 );
-
+          rho_a = std::min( rho_a + ART::getEpsilon( module_a ), 1.0 );
+          
           // if it runs out of categories, then it can't find a match
-          if ( j == as<int>( module_a["numCategories"] ) - 1 ){
-            module_a["Jmax"] = NA_INTEGER;
+          if ( j == ART::getNumCategories( module_a ) - 1 ){
+            ART::setJmax( module_a, NA_INTEGER );
             resonance = true;
           }
           else{
@@ -477,89 +516,121 @@ namespace ARTMAP {
             j++;
           } // if
         } // else
-
+        
       } // while resonance
-
+      
       return List::create( _["category_a"] = category_a,
-                           _["F1_b"] = F1_b,
-                           _["matched"] = matched );
+                           _["F1_b"] = F1_b );
+      
+    }
+  
+    void subsetMapfield( List mapfield ){
+      int numCategories_a = getNumCategories_a( mapfield );
+      int numCategories_b = getNumCategories_b( mapfield );
+      ART::setWeightMatrix( mapfield, subsetRows( subsetColumns( 
+                                                                ART::getWeightMatrix( mapfield ), numCategories_b 
+                                                               ),
+                                                  numCategories_a )
+                          );
+      ART::setChangeVector( mapfield, subsetVector( ART::getChangeVector( mapfield ), numCategories_a ) );
+    }
+  
+  }
 
+  void init( IModel &model ){
+    List mapfield = getMapfield( model.net );
+    if ( isSimplified( model.net ) ){
+      simplified::initMapfield( mapfield );
+    } else{
+      standard::initMapfield( mapfield );
     }
   }
 
-
-  void train( List net,
+  void train( IModel &model,
               NumericMatrix x,
               Nullable<NumericVector> vTarget,
-              Nullable< NumericMatrix > mTarget,
-              std::function< NumericVector( NumericVector ) > codeFun,
-              std::function< double( List, NumericVector, NumericVector ) > activationFun,
-              std::function< double( List, NumericVector, NumericVector ) > matchFun,
-              std::function< NumericVector( List, NumericVector, NumericVector ) > weightUpdateFun,
-              std::function< NumericVector( List, NumericVector, NumericVector ) > mapfieldUpdateFun ){
-
-    int ep = as<int>( net["maxEpochs"] );
+              Nullable< NumericMatrix > mTarget ){
+    
+    int ep = ART::getMaxEpochs( model.net );
     int nrow = x.rows();
-    if ( !isARTMAP( net ) ){
+    if ( !isARTMAP( model.net ) ){
       stop( "The network is not an ARTMAP." );
     }
-    if ( !mTarget.isNotNull() && !isSimplified( net ) ){
-       stop( "The labels are missing. End running." );
+    if ( !mTarget.isNotNull() && !isSimplified( model.net ) ){
+      stop( "The labels are missing. End running." );
     }
-    else if ( !vTarget.isNotNull() && isSimplified( net ) ){
+    else if ( !vTarget.isNotNull() && isSimplified( model.net ) ){
       stop("The labels are missing. End running.");
     }
     for (int i = 1; i <= ep; i++){
-      int change = 0;
       std::cout << "Epoch no. " << i << std::endl;
-
+      
       for (int j = 0; j < nrow; j++){
-        if ( isSimplified( net ) )
-          change += simplified::learn( net, codeFun( x( j, _ ) ), NumericVector ( vTarget )( j ), activationFun, matchFun, weightUpdateFun );
-        else
-          change += standard::learn( net, codeFun( x( j, _ ) ), codeFun( NumericMatrix ( mTarget )( j, _ ) ), activationFun, matchFun, weightUpdateFun, mapfieldUpdateFun );
+        if ( isSimplified( model.net ) )
+          simplified::learn( model, model.processCode( x( j, _ ) ), NumericVector ( vTarget )( j ) );
+        else 
+          standard::learn( model, model.processCode( x( j, _ ) ), model.processCode( NumericMatrix ( mTarget )( j, _ ) ) );
       }
-
-      cout << "Number of changes: " << change << endl;
-      if ( change == 0) {
-        net["epochs"] = i;
+      
+      List mapfield = getMapfield( model.net );
+      int change = ART::getTotalChange( model.net ) + ART::getModuleChange( mapfield );
+      cout << "Number of changes " << change << endl;
+      if ( change == 0 ) {
+        ART::setEpoch( model.net, i );
         break;
+      } else{
+        List module_a = getModule_a( model.net );
+        ART::changeReset( module_a );
+        ART::counterReset( module_a );
+        
+        ART::changeReset( mapfield );
+        
+        if ( !isSimplified( model.net ) ){
+          List module_b = getModule_b( model.net );
+          ART::changeReset( module_b );
+          ART::counterReset( module_b );
+        }
       }
     }
-    // subset weight matrix
-    int l = net["numModules"];
+    // subset module weight matrix, counter and change vectors
+    int l = ART::getNumModules( model.net );
     for ( int i = 0; i < l; i++ ){
-      List module = as<List>( net["module"] )[i];
-      module["w"] = subsetRows( module["w"], module["numCategories"] );
+      List module = ART::getModule( model.net, i );
+      int numCategories = ART::getNumCategories( module );
+      ART::setWeightMatrix( module, subsetRows( ART::getWeightMatrix( module ), numCategories ) );
+      ART::setCounterVector( module, subsetVector( ART::getCounterVector( module ), numCategories ) );
+      ART::setChangeVector( module, subsetVector( ART::getChangeVector( module ), numCategories ) );
+    }
+    
+    // subset mapfield weight matrix, counter and change vectors
+    if ( isSimplified( model.net ) ){
+      simplified::subsetMapfield( getMapfield( model.net ) );
+    }
+    else{
+      standard::subsetMapfield( getMapfield( model.net ) );
     }
   }
-
-  List predict( List net,
+  
+  List predict( IModel &model,
                 NumericMatrix x,
-                Nullable< NumericVector > vTarget,
-                Nullable< NumericMatrix > mTarget,
-                std::function< NumericVector( NumericVector ) > codeFun,
-                std::function< NumericVector( NumericVector ) > uncodeFun,
-                std::function< double( List, NumericVector, NumericVector ) > activationFun,
-                std::function< double( List, NumericVector, NumericVector ) > matchFun,
-                bool test = false ){
-
+                Nullable< NumericVector > vTarget = R_NilValue ,
+                Nullable< NumericMatrix > mTarget = R_NilValue){
     List classified;
     int nrow = x.rows();
     int ncol = x.cols();
     IntegerVector category_a( nrow ), matched( nrow );
-
-    if ( isSimplified( net ) ){
+    
+    if ( isSimplified( model.net ) ){
       NumericVector predicted ( nrow );
       for ( int i = 0; i < nrow; i++ ){
-
-          List result = simplified::classify( net, codeFun( x( i,_ ) ), activationFun, matchFun, test );
-          category_a( i ) = result( "category_a" );
-          predicted( i ) = result( "predicted" );
-          if ( test ){
-            matched( i ) = simplified::test( predicted( i ), NumericVector( vTarget )( i ) );
-          }
-
+        
+        List result = simplified::classify( model, model.processCode( x( i,_ ) ) );
+        category_a( i ) = result( "category_a" );
+        predicted( i ) = result( "predicted" );
+        if ( vTarget.isNotNull() ){
+          matched( i ) = simplified::test( predicted( i ), NumericVector( vTarget )( i ) );
+        }
+        
       }
       classified = List::create( _["predicted"] = predicted,
                                  _["category_a"] = category_a,
@@ -567,32 +638,33 @@ namespace ARTMAP {
     }
     else{
       NumericMatrix predicted( nrow, ncol );
-
+      
       for ( int i = 0; i < nrow; i++ ){
-        List result = standard::classify( net, codeFun( x( i,_ ) ), activationFun, matchFun, test );
-        predicted( i, _ ) = uncodeFun( as<NumericVector>( result( "F1_b" ) ) );
+        List result = standard::classify( model, model.processCode( x( i,_ ) ) );
+        predicted( i, _ ) = model.unProcessCode( result( "F1_b" ) );
         category_a( i ) = result( "category_a" );
-        if ( test ){
-          matched( i ) = standard::test( net, codeFun( NumericMatrix ( mTarget )( i, _ ) ), activationFun, matchFun );
+        if ( mTarget.isNotNull() ){
+          matched( i ) = standard::test( model, model.processCode( NumericMatrix ( mTarget )( i, _ ) ) );
         }
       }
-
+      
       classified = List::create( _["predicted"] = predicted,
                                  _["category_a"] = category_a,
                                  _["matched"] = matched );
     }
-
+    
     return classified;
-
-  }
+    
+  } 
 }
 
 
 // [[Rcpp::export(.ARTMAP)]]
-List newARTMAP ( int dimension, double vigilance = 0.75, double learningRate = 1.0, int categorySize = 100, int maxEpochs = 20, bool simplified = false ){
+List newARTMAP ( int dimension, int num = 1, double vigilance = 0.75, double learningRate = 1.0, int categorySize = 100, int maxEpochs = 20, bool simplified = false ){
   if ( vigilance < 0.0 || vigilance > 1.0 ){
     stop( "The vigilance value must be between 0 and 1.0." );
   }
+  
   if ( learningRate < 0.0 || learningRate > 1.0 ){
     stop( "The learningRate value must be between 0 and 1.0." );
   }
@@ -607,7 +679,6 @@ List newARTMAP ( int dimension, double vigilance = 0.75, double learningRate = 1
   }
   
   List net;
-  List mapfield;
   if ( !simplified ){
     net = newART( dimension, 2, vigilance, learningRate, categorySize, maxEpochs );
     as<List>( net["module"] ).attr( "names" ) = CharacterVector::create( "a", "b" );
@@ -616,7 +687,9 @@ List newARTMAP ( int dimension, double vigilance = 0.75, double learningRate = 1
     net = newART( dimension, 1, vigilance, learningRate, categorySize, maxEpochs );
     as<List>( net["module"] ).attr( "names" ) = CharacterVector::create( "a" );
   }
-  mapfield.push_back( ARTMAP::mapfield( 0, dimension, vigilance, learningRate, simplified ), "ab" );
+  //mapfield.push_back( ARTMAP::mapfield( 0, vigilance, learningRate, simplified ), "ab" );
+  
+  List mapfield = ARTMAP::mapfield( 0, vigilance = vigilance, learningRate = learningRate, categorySize = 50, simplified = simplified );
   net.push_back( mapfield, "mapfield" );
   net.attr( "class" ) = "ARTMAP";
   net.attr( "simplified" ) = simplified;
@@ -625,25 +698,45 @@ List newARTMAP ( int dimension, double vigilance = 0.75, double learningRate = 1
 
 // [[Rcpp::export(.trainARTMAP)]]
 void trainARTMAP ( List net, NumericMatrix x, Nullable< NumericVector > vTarget = R_NilValue, Nullable< NumericMatrix > mTarget = R_NilValue ){
-
+  IModel *model;
+  
   if ( isFuzzy( net ) ){
-    Fuzzy::trainARTMAP( net, x, vTarget, mTarget );
+    model = new Fuzzy( net );
   }
+  
   if ( isHypersphere( net ) ){
-    Hypersphere::trainARTMAP( net, x, vTarget, mTarget );
+    if ( ARTMAP::isSimplified( net ) ){
+      model = new Hypersphere( net, x );
+    }
+    else{
+      stop( "The hypersphere model can only be used in the simplified ARTMAP." );
+    }
   }
-
+  
+  ART::init( *model );
+  ARTMAP::train( *model, x, vTarget, mTarget );
+  
+  delete model;
+  
 }
 
 // [[Rcpp::export(.predictARTMAP)]]
-List predictARTMAP ( List net, NumericMatrix x, Nullable< NumericVector > vTarget = R_NilValue, Nullable< NumericMatrix > mTarget = R_NilValue, bool test = false ){
-
-  List results;
+List predictARTMAP ( List net, NumericMatrix x, Nullable< NumericVector > vTarget = R_NilValue, Nullable< NumericMatrix > mTarget = R_NilValue ){
+  
+  IModel *model;
   if ( isFuzzy( net ) ){
-    results = Fuzzy::predictARTMAP( net, x, vTarget, mTarget, test );
+    model = new Fuzzy ( net );
   }
   if ( isHypersphere( net ) ){
-    results = Hypersphere::predictARTMAP( net, x, vTarget, mTarget, test );
+    if ( ARTMAP::isSimplified( net ) ){
+      model = new Hypersphere( net, x );
+    }
+    else{
+      stop( "The hypersphere model can only be used in the simplified ARTMAP." );
+    }
   }
+  
+  List results = ARTMAP::predict( *model, x, vTarget, mTarget );
+  delete model;
   return results;
 }

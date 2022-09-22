@@ -1,43 +1,43 @@
 
-#' Create an ART Network
+#' ART
 #' @description Create a new ART object
-#' @param rule The activation / match / learning rule to use. The choices available are fuzzy and hypersphere.
+#' @param numModules The number of modules in the network. Currently, it supports only 1 module.
+#' @param rule The activation / match / lerning rule to use. The choices available are fuzzy.
 #' @param dimension The number of dimension/features in the data.
 #' @param vigilance The vigilance parameter. Must be between 0 and 1.
 #' @param learningRate The learning rate. Must be between 0 and 1.
-#' @return ART returns an ART object.
 #' @export
-ART <- function(rule = c("fuzzy", "hypersphere"), dimension, vigilance = 0.7, learningRate = 1.0, maxEpochs = 10){
-
+ART <- function(numModules = 1, rule = c("fuzzy", "hypersphere"), dimension, vigilance = 0.7, learningRate = 1.0, maxEpochs = 10){
+  
   rule <- match.arg(rule)
-
-  art <- .ART( dimension, 1, vigilance, learningRate)
-
+  
+  art <- .ART( dimension, numModules, vigilance, learningRate, maxEpochs = maxEpochs)
+  
   attr(art, "rule") <- rule
-
+  
   return (art)
 }
-#' Create a Topological ART Network
+
+#' ART
 #' @description Create a new TopoART object
-#' @param rule The activation / match / lerning rule to use. The choices available are fuzzy and hypersphere.
+#' @param numModules The number of modules in this network. It must be at least 2.
+#' @param rule The activation / match / lerning rule to use. The choices available are fuzzy.
 #' @param dimension The number of dimension/features in the data
-#' @param numModules The number of TopoART modules. The default is 2.
 #' @param vigilance The vigilance parameter. Must be between 0 and 1.
 #' @param learningRate1 The learning rate when this neuron has the highest activation. Must be between 0 and 1.
 #' @param learningRate2 The learning rate when this neuron has the second highest activation. Must be between 0 and 1.
 #' @param tau The number of learning cycles before the F2 neurons with counts below the threshold are removed. Default is 100.
 #' @param phi The count threshold. The F2 neuron is kept when the count >= phi, removed when the count < phi.
 #' @param maxEpochs The maximum number of epochs. Default is 20.
-#' @return TopoART returns a TopoART object.
 #' @export
-TopoART <- function(rule = c("fuzzy", "hypersphere"), dimension, numModules = 2, vigilance = 0.7, learningRate1 = 1.0, learningRate2 = 0.6, tau = 100, phi = 6, maxEpochs = 20){
-
-  rule <- match.arg(rule)
-
+TopoART <- function(numModules = 2, rule = c("fuzzy", "hypersphere"), dimension, vigilance = 0.7, learningRate1 = 1.0, learningRate2 = 0.6, tau = 100, phi = 6, maxEpochs = 20){
+  if (numModules < 2){
+    stop("The number of modules must be at least 2.")
+  }
   topoART <- .TopoART(dimension, numModules, vigilance, learningRate1, learningRate2, tau, phi, maxEpochs = maxEpochs)
-
+  
   attr(topoART, "rule") <- rule
-
+  
   return (topoART)
 }
 
@@ -114,7 +114,7 @@ train.ARTMAP <- function(network, .data, target){
     .trainARTMAP(network, .data, vTarget = target)
   } else{
     # it is a matrix
-    .trainARTMAP(network, .data, mTarget = target)
+    .trainARTMAP(network, .data, vTarget = NULL, mTarget = target)
   }
 }
 
@@ -164,19 +164,18 @@ predict.ARTMAP <- function(network, .data, target = NULL){
       stop("The target must be either a vector or a matrix.")
     }
     
-    test <- TRUE
     if (!isSimplified(network)){
       if (!is.matrix(target))
         target <- as.matrix(target)
-      p <- .predictARTMAP(network, .data, mTarget = target, test = test)
+      p <- .predictARTMAP(network, .data, mTarget = target)
     } else{
       if (!is.vector(target)){
         stop("The simplified ARTMAP requires a vector for the target.")
       }
-      p <- .predictARTMAP(network, .data, vTarget = target, test = test)
+      p <- .predictARTMAP(network, .data, vTarget = target)
     }
   } else{
-    p <- .predictARTMAP(network, .data, test = test)
+    p <- .predictARTMAP(network, .data)
     
   }
   return (p)
@@ -240,25 +239,8 @@ getTopoClustersCategories <- function(module){
 #' @return A list of dummy codes with the keys being the class labels and the values being the dummy (binary) codes.
 #' @export
 createDummyCodeMap <- function(classLabels){
-  if (is.factor(classLabels)){
-    classLabels <- as.character(classLabels)
-  }
-
-  l <- length(classLabels)
-  s <- seq(1, l)
-  code <- list()
-  if (is.numeric(classLabels)){
-    for (i in seq_along(classLabels)){
-      code[[as.character(classLabels[i])]] <- rep(0, l)
-      code[[as.character(classLabels[i])]][s[i]] <- 1
-    }
-  } else if (is.character(classLabels)){
-    for (i in seq_along(classLabels)){
-      code[[classLabels[i]]] <- rep(0, l)
-      code[[classLabels[i]]][s[i]] <- 1
-    }
-  }
-
+  classLabels <- as.character(classLabels)
+  code <- .createDummyCodeMap(as.character(classLabels))
   return (code)
 }
 
@@ -290,15 +272,7 @@ encodeLabel <- function(classLabels, dummyCode){
 #' @rdname createDummyCodeMap
 #' @export
 decode <- function(dummyClasses, dummyCode){
-  labels <- vector(mode = "numeric", length = nrow(dummyClasses))
-  for (i in seq_len(nrow(dummyClasses))){
-    for (j in seq_len(length(dummyCode))){
-      if (identical(dummyCode[[j]], dummyClasses[i,])){
-        labels[i] <- names(dummyCode)[j]
-        break
-      }
-    }
-  }
+  labels <- .decode(dummyClasses, dummyCode)
   return (labels)
 }
 

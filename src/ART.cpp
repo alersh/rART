@@ -16,119 +16,384 @@ using namespace std;
 
 namespace ART {
 
-  List module ( int id, int dimension, double vigilance = 0.75, double learningRate = 1.0, int categorySize = 100 ){
+  List module ( int id, double vigilance = 0.75, double learningRate = 1.0, int categorySize = 100 ){
     NumericMatrix w;
-    NumericVector stm;
+    IntegerVector n;
+    IntegerVector change;
+    IntegerVector jmax;  
+    jmax.push_back( -1 );  // one element of -1
     List module = List::create( _["id"] = id,                   // module id
+                                _["weightDimension"] = 0,       // the number of dimensions in the weight
                                 _["capacity"] = categorySize,   // number of category to create when the module runs out of categories to match
                                 _["numCategories"] = 0,         // number of categories created during learning
-                                _["dimension"] = dimension,     // number of features/dimensions in the data
                                 _["alpha"] = 0.001,             // activation function parameter
                                 _["epsilon"] = 0.000001,        // match function parameter
                                 _["w"] = w,                     // top-down weights
                                 _["rho"] = vigilance,           // vigilance parameter
                                 _["beta"] = learningRate,       // learning parameter
-                                _["Jmax"] = -1                  // the node index with the highest activation and the best match
+                                _["Jmax"] = jmax,               // the node index with the highest activation and the best match
+                                _["counter"] = n,               // counter
+                                _["change"] = change            // keep track of the number of changes in each node
     );
-
+    
     module.attr( "class" ) = "ART";
     return module;
   }
-
-  NumericVector activation( List net, NumericVector x, std::function< double( List, NumericVector, NumericVector ) > fun ){
-    int nc = net["numCategories"];
-    NumericVector a( nc );
-
-    for ( int k = 0; k < nc; k++ ){
-      NumericVector w = as<NumericMatrix>( net["w"] )( k, _ );
-      a[k] = fun( net, x, w );
+  
+  // rho: If there is just one module, then return the rho as is. If there are more than
+  // one module in the hierarchy, then the next module in the hierarchy will have 
+  // rho = 0.5*(rho + 1) with rho being the vigilance value of the previous module.
+  double rho ( double rho, int moduleId ){
+    
+    for ( int i = 1; i <= moduleId; i++ ){
+      rho = 0.5*( rho + 1 );
     }
-
-    return a;
+    
+    return rho;
   }
-
-  double match( List net, NumericVector x, int weightIndex, std::function< double( List, NumericVector, NumericVector ) > fun ){
-    NumericVector w = as<NumericMatrix>( net["w"] )( weightIndex, _ );
-    double a = fun( net, x, w );
-    return a;
-  }
-
-
-  int weightUpdate( List net, NumericVector x, int weightIndex, std::function< NumericVector( List, NumericVector, NumericVector ) > fun ){
-    NumericMatrix w_old = as<NumericMatrix>( net["w"] );
-    NumericMatrix wm = as<NumericMatrix>( net["w"] );
-    NumericVector w =  as<NumericMatrix>( wm )( weightIndex, _ );
-
-    wm( weightIndex, _ ) = fun( net, x, w );
-    int change = 0;
-    double s = sum( abs ( w_old( weightIndex, _ ) - wm( weightIndex, _ ) ));
-    if ( s > 0.0000001 ){
-      change++;
+  
+  List create ( int dimension, int num = 1, double vigilance = 0.75, double learningRate = 1.0, int categorySize = 100, int maxEpochs = 20 ){
+    if ( vigilance < 0.0 || vigilance > 1.0 ){
+      stop( "The vigilance value must be between 0 and 1.0." );
     }
-    return change;
-  }
-
-  void newCategory( List net, NumericVector x ){
-
-    if ( as<int>( net["numCategories"] ) == 0 ){
-      as<NumericMatrix>( net["w"] )( 0,_ ) = x;
-      net["numCategories"] = as<int>( net["numCategories"] ) + 1;
+    if ( learningRate < 0.0 || learningRate > 1.0 ){
+      stop( "The learningRate value must be between 0 and 1.0." );
     }
-    else{
-      if (as<int>( net["numCategories"] ) == as<NumericMatrix>( net["w"] ).rows() ){
-        // reached the max capacity, so add more rows
-        NumericMatrix wm = as<NumericMatrix>( net["w"] );
-        int nrow = wm.nrow();
-        int ncol = wm.ncol();
-        NumericMatrix newWeight ( nrow + as<int>( net["capacity"] ), ncol );
-        for (int i = 0; i < nrow; i++){
-          newWeight ( i,_ ) = wm( i,_ );
-
-        }
-        net["w"] = newWeight;
+    if ( num < 1 ){
+      stop( "The num value must be greater than 0." );
+    }
+    if ( categorySize < 1 ){
+      stop( "The categorySize value must be greater than 0." );
+    }
+    if ( maxEpochs < 1 ){
+      stop( "The maxEpochs value must be greater than 0." );
+    }
+    if ( dimension < 1 ){
+      stop( "The dimension value must be greater than 0." );
+    }
+    
+    
+    List net = List::create( _["numModules"] = num,       // number of ART modules
+                             _["dimension"] = dimension,  // number of features
+                             _["epochs"] = 0,             // total number of epochs required to learn
+                             _["maxEpochs"] = maxEpochs,  // maximum number of epochs
+                             _["activeModule"] = -1       // an index that keeps track of which module is currently active
+    );
+    
+    List modules;
+    for ( int i = 0; i < num; i++ ){
+      vigilance = ART::rho( vigilance, i );
+      if ( vigilance > 0 ){
+        modules.push_back( ART::module( i, vigilance, learningRate, categorySize ) );
       }
-      int n = as<int>( net["numCategories"] ) + 1;
-      net["numCategories"] = n;
-      as<NumericMatrix>( net["w"] )( n-1,_ ) = x;
-
+      else{
+        net["numModules"] = as<int>( net["numModules"] ) - 1;
+        cout << "Module Id " << i << " cannot be created because its vigilance will be 0 or negative." << endl;
+      }
     }
-
+    
+    net.push_back( modules, "module" );
+    
+    net.attr( "class" ) = CharacterVector::create( "ART" );
+    return net;
+  }
+  
+  int getID( List module ){
+    return module["id"];
   }
 
-  int learn( List net,
-             int id,
-             NumericVector d,
-             std::function< double( List, NumericVector, NumericVector ) > activationFun,
-             std::function< double( List, NumericVector, NumericVector ) > matchFun,
-             std::function< NumericVector( List, NumericVector, NumericVector ) > weightUpdateFun ){
-    List module = as<List>( net["module"] )[id];
-    int change = 0;
+  int getDimension( List net ){
+    return net["dimension"];
+  }
+  
+  int getJmax( List module, int matchIndex = 0 ){
+    return as<IntegerVector>( module["Jmax"] )[matchIndex];
+  }
+  
+  void setJmax( List module, int J, int matchIndex = 0 ){
+    IntegerVector v = module["Jmax"];
+    v[matchIndex] = J;
+    module["Jmax"] = v;
+  }
+  
+  void addJmax( List module, int J ){
+    IntegerVector v = module["Jmax"];
+    v.push_back( J );
+    module["Jmax"] = v;
+  }
+  
+  int getMaxEpochs( List net ){
+    return net["maxEpochs"];
+  }
+  
+  void setEpoch( List net, int epoch ){
+    net["epochs"] = epoch;
+  }
+  
+  int getNumModules( List net ){
+    return net["numModules"];
+  }
+  
+  List getModule( List net, int moduleID ) {
+    return as<List>( net["module"] )[moduleID];
+  }
+  
+  void setModule( List net, List module ){
+    as<List>( net["module"] )[getID( module )] = module;
+  }
+  
+  bool hasMoreModules( List net, int currentModuleID ){
+    return ( currentModuleID+1 ) < ART::getNumModules( net ); 
+  }
+  
+  List nextModule( List net ){
+    int numModules = getNumModules( net );
+    if ( hasMoreModules ( net, net["activeModule"] ) ){
+      return getModule( net, as<int>( net["activeModule"] ) + 1 );
+    }
+    return NULL;
+  }
+  
+  void incChange( List module, int index ){
+    as<IntegerVector>( module["change"] )[index]++;
+  }
+  
+  int getModuleChange( List module ){
+    return sum( as<IntegerVector>( module["change"] ) );
+  }
 
-    int nc = module["numCategories"];
+  int getTotalChange( List net ){
+    int n = getNumModules( net );
+    int s = 0;
+    for ( int i = 0; i < n; i++ ){
+      List module = getModule( net, i );
+      s += getModuleChange( module );
+    }
+    return s;
+  }
+
+  IntegerVector getChangeVector( List module ){
+    return module["change"];
+  }
+  
+  void setChangeVector( List module, IntegerVector v ){
+    module["change"] = v;
+  }
+  
+  void changeReset( List module ){
+    IntegerVector c = as<IntegerVector>( module["change"] );
+    int l = c.length();
+    for ( int i = 0; i < l; i++ ){
+      c( i ) = 0;
+    }
+    
+    module["change"] = c;
+  }
+
+  int getCapacity( List module ){
+    return module["capacity"];
+  }
+  
+  NumericMatrix getWeightMatrix( List module ){
+    return module["w"];
+  }
+  void setWeightMatrix( List module, NumericMatrix w ){
+    module["w"] = w;
+  }
+
+  int getWeightDimension( List module ){
+    return module["weightDimension"];
+  }
+
+  void setWeightDimension( List module, int dimension ){
+    module["weightDimension"] = dimension;
+  }
+  
+  NumericVector getWeight( List module, int weightIndex ) {
+    return getWeightMatrix( module )( weightIndex, _ );
+  }
+  void setWeight( List module, int weightIndex, NumericVector w ) {
+    NumericMatrix wm = as<NumericMatrix>( module["w"] );
+    wm( weightIndex, _ ) = w;
+  }
+  
+  double getRho( List module ) {
+    return module["rho"];
+  }
+  void setRho( List module, double rho ) {
+    module["rho"] = rho;
+  }
+  
+  int getNumCategories( List module ){
+    return module["numCategories"];
+  }
+  
+  void setNumCategories( List module, int x ){
+    module["numCategories"] = x;
+  }
+  
+  double getLearningRate( List module ){
+    return module["beta"];
+  }
+  
+  void setLearningRate( List module, double learningRate ){
+    module["beta"] = learningRate;
+  }
+  
+  int getCounter( List module, int weightIndex ){
+    return as<IntegerVector>( module["counter"] )( weightIndex );
+  }
+  
+  IntegerVector getCounterVector( List module ){
+    return module["counter"];
+  }
+  
+  void counterUpdate ( List module, int nodeIndex ){
+    IntegerVector n = as<IntegerVector>( module["counter"] );
+    n( nodeIndex ) = n( nodeIndex ) + 1;
+    
+    module["counter"] = n;
+  }
+  
+  void counterReset ( List module ){
+    IntegerVector n = as<IntegerVector>( module["counter"] );
+    int l = n.length();
+    for ( int i = 0; i < l; i++ ){
+      n( i ) = 0;
+    }
+    
+    module["counter"] = n;
+  }
+  
+  void setCounterVector( List module, IntegerVector v ){
+    module["counter"] = v;
+  }
+  
+  double getAlpha( List module ){
+    return module["alpha"];
+  }
+  
+  double getEpsilon( List module ){
+    return module["epsilon"];
+  }
+  
+  void initModule( List module, int weightDimension ){
+    int size = ART::getCapacity( module );
+    setWeightDimension( module, weightDimension );
+    
+    NumericMatrix w = no_init( size, weightDimension );
+    setWeightMatrix( module, w );
+    
+    IntegerVector n( size );
+    setCounterVector( module, n);
+    
+    IntegerVector c(size);
+    setChangeVector( module, c );
+  }
+  
+  void init( IModel &model ){
+    int n = ART::getNumModules( model.net );
+    for ( int i = 0; i < n; i++ ){
+      List module = ART::getModule( model.net, i );
+      initModule( module, model.getWeightDimension( getDimension( model.net ) ) );
+    }
+  }
+  
+  NumericVector activation( IModel &model, List module, NumericVector x ){
+    
+    int nc = getNumCategories( module );
+    NumericVector a( nc );
+    
+    for ( int k = 0; k < nc; k++ ){
+      NumericVector w = getWeight( module, k );
+      a[k] = model.activation( module, x, w );
+    }
+    
+    return a;
+  }
+  
+  double match( IModel &model, List module, int weightIndex, NumericVector x ){
+    NumericVector w = getWeight( module, weightIndex );
+    double a = model.match( module, x, w );
+    return a;
+  }
+  
+  
+  void weightUpdate( IModel &model, List module, int weightIndex, NumericVector x ){
+    
+    NumericVector w_old = getWeight( module, weightIndex );
+    NumericVector w_new = model.weightUpdate( module, getLearningRate( module ), x, w_old );
+    setWeight( module, weightIndex, w_new );
+    double s = sum( abs ( w_old - w_new ) );
+    if ( s > 0.0000001 ){
+      incChange( module, weightIndex );
+    }
+    
+  }
+  
+  void newCategory( IModel &model, List module, NumericVector x ){
+    
+    int numCategories = getNumCategories( module );
+    int newCategoryIndex = numCategories;
+    NumericMatrix wm = getWeightMatrix( module );
+    if ( numCategories == wm.rows() ){
+      // reached the max capacity, so add more rows
+      NumericMatrix newWeight = appendRows( wm, getCapacity( module ) );
+      setWeightMatrix( module, newWeight );
+      
+      IntegerVector n = appendVector( getCounterVector( module ), getCapacity( module ) );
+      setCounterVector( module, n );
+      
+      IntegerVector c = appendVector( getChangeVector( module ), getCapacity( module ) );
+      setChangeVector( module, c );
+    }
+    setWeight( module, newCategoryIndex, model.newWeight( x ) );
+    counterUpdate( module, newCategoryIndex );
+    incChange( module, newCategoryIndex );
+    setNumCategories( module, newCategoryIndex + 1 );
+    setJmax( module, newCategoryIndex );
+  }
+  
+  void learn( IModel &model,
+              int id,
+              NumericVector d ){
+    List module = getModule( model.net, id );
+    
+    int nc = getNumCategories( module );
     if ( nc == 0 ){
-      newCategory( module, d );
-      change++;
+      newCategory( model, module, d );
     }
     else{
-      NumericVector a = activation( module, d, activationFun );
+      NumericVector a = activation( model, module, d );
       NumericVector T_j = sortIndex( a );
       bool resonance = false;
       int j = 0;
       while( !resonance ){
         int J_max = T_j( j );
-        double m = match( module, d, J_max, matchFun );
-        if ( m >= as<double>( module["rho"] ) ){
-          module["Jmax"] = J_max;
-          change += weightUpdate( module, d, J_max, weightUpdateFun );
-
+        double m = match( model, module, J_max, d );
+        if ( m >= getRho( module ) ){
+          setJmax( module, J_max );
+          weightUpdate( model, module, J_max, d );
+          counterUpdate( module, J_max );
+          
           resonance = true;
+          if ( hasMoreModules( model.net, id ) ){
+            // match >= rho_a, then move up to the next module in the hierarchy
+            // the weight of this node will be the input for the next module
+            
+            learn( model, id+1, d );
+          }
         }
         else{
-          if ( j == as<int>( module["numCategories"] ) - 1 ){
-            module["Jmax"] = j + 1;
-            newCategory( module, d );
-            change++;
+          if ( j == getNumCategories( module ) - 1 ){
+            newCategory( model, module, d );
             resonance = true;
+            if ( hasMoreModules( model.net, id ) ){
+              // match >= rho_a, then move up to the next module in the hierarchy
+              // the weight of this node will be the input for the next module
+              // NumericVector w =  as<NumericMatrix>( module["w"] )( J_max, _ );
+              learn( model, id+1, d );
+            }
           }
           else{
             j++;
@@ -136,34 +401,31 @@ namespace ART {
         } // match
       } // while resonance
     } // if
-
-    return change;
+    
   }
-
-  int classify ( List net,
+  
+  int classify ( IModel &model,
                  int id,
-                 NumericVector d,
-                 std::function< double( List, NumericVector, NumericVector ) > activationFun,
-                 std::function< double( List, NumericVector, NumericVector ) > matchFun ){
-    List module = as<List>( net["module"] )[id];
+                 NumericVector d ){
+    List module = ART::getModule( model.net, id );
     int category = -1;
-
-    NumericVector a = activation( module, d, activationFun );
+    
+    NumericVector a = activation( model, module, d );
     NumericVector T_j = sortIndex( a );
     bool resonance = false;
     int j = 0;
-
+    
     while(!resonance){
       int J_max = T_j( j );
-      double m = match( module, d, J_max, matchFun );
-      if ( m >= as<double>( module["rho"] ) ){
-        module["Jmax"] = J_max;
+      double m = match( model, module, J_max, d );
+      if ( m >= getRho( module ) ){
+        setJmax( module, J_max );
         category = J_max;
         resonance = true;
       }
       else{
-        if ( j  == as<int>( module["numCategories"] ) - 1 ){
-          module["Jmax"] = category;
+        if ( j  == getNumCategories( module ) - 1 ){
+          setJmax( module, category );
           resonance = true;
         }
         else{
@@ -171,135 +433,123 @@ namespace ART {
         } // if
       } // match
     } // while resonance
-
+    
     return category;
   }
-
-  void train( List net,
-              NumericMatrix x,
-              std::function< NumericVector( NumericVector ) > codeFun,
-              std::function< double( List, NumericVector, NumericVector ) > activationFun,
-              std::function< double( List, NumericVector, NumericVector ) > matchFun,
-              std::function< NumericVector( List, NumericVector, NumericVector ) > weightUpdateFun ){
-
-    int ep = as<int>( net["maxEpochs"] );
+  
+  void train( IModel &model,
+              NumericMatrix x){
+    
+    int ep = getMaxEpochs( model.net );
     int nrow = x.rows();
+    int numModules = getNumModules( model.net );
     for (int i = 1; i <= ep; i++){
-      int change = 0;
+      
       std::cout << "Epoch no. " << i << std::endl;
-
-      // currently, only one module is supported
-      int id = as<List>( as<List>( net["module"] )[0] )["id"];
+      
+      int id = getModule( model.net, 0 )["id"];
       for (int i = 0; i < nrow; i++){
-        change += learn( net, id, codeFun( x( i, _ ) ), activationFun, matchFun, weightUpdateFun );
+        learn( model, id, model.processCode( x( i, _ ) ) );
       }
-
-      std::cout << "Number of changes: " << change << std::endl;
-      if ( change == 0) {
-        net["epochs"] = i;
+      
+      for ( int j = 0; j < numModules; j++ ){
+        int change = getModuleChange( ART::getModule( model.net, j ) );
+        cout << "ID " << j << " Number of changes: " << change << endl;
+      }
+      if ( getTotalChange( model.net ) == 0 ) {
+        ART::setEpoch( model.net, i );
         break;
+      } else{
+        if ( i < ep ){
+          // only reset counters if it hasn't reached the maximum epoch
+          // that way if the user wants to stop the learning using fewer epochs
+          // then the node counters are still available for inspection
+          int n  = getNumModules( model.net );
+          for ( int i = 0; i < n; i++ ){
+            List module = getModule( model.net, i );
+            counterReset( module );
+            changeReset( module );
+          }
+        }
       }
     }
-    // subset weight matrix
-    int l = net["numModules"];
+    // subset weight matrix; loop through all modules
+    int l = getNumModules( model.net );
     for ( int i = 0; i < l; i++ ){
-      List module = as<List>( net["module"] )[i];
-      module["w"] = subsetRows( module["w"], module["numCategories"] );
+      List module = getModule( model.net, i );
+      int numCategories = getNumCategories( module );
+      setWeightMatrix( module, subsetRows( getWeightMatrix( module ), numCategories ) );
+      setCounterVector( module, subsetVector( getCounterVector( module ), numCategories ) );
+      setChangeVector( module, subsetVector( getChangeVector( module ), numCategories ) );
     }
   }
-
-  List predict( List net,
+  
+  List predict( IModel &model,
                 int id,
-                NumericMatrix x,
-                std::function< NumericVector( NumericVector ) > codeFun,
-                std::function< double( List, NumericVector, NumericVector ) > activationFun,
-                std::function< double( List, NumericVector, NumericVector ) > matchFun ){
+                NumericMatrix x ){
     List classified;
     int nrow = x.rows();
     NumericVector category( nrow );
-
+    
     for (int i = 0; i < nrow; i++){
-        // currently supports only one module
-        int result = classify( net["module"], id, codeFun( x( i,_ ) ), activationFun, matchFun );
-        if ( result == -1 ){
-          category( i ) = NA_INTEGER;
-        }
-        else{
-          category( i ) = result;
-        }
-
+      // currently supports only one module
+      int result = classify( model, id, model.processCode( x( i,_ ) ) );
+      if ( result == -1 ){
+        category( i ) = NA_INTEGER;
+      }
+      else{
+        category( i ) = result;
+      }
+      
     }
     classified = List::create( _["category"] = category );
-
+    
     return classified;
-
+    
   }
 
 }
 
 // [[Rcpp::export(.trainART)]]
-void trainART ( List net, NumericMatrix x ){
-
+void train ( List net, NumericMatrix x ){
+  IModel *model;
+  
   if ( isFuzzy( net ) ){
-    Fuzzy::trainART( net, x );
+    model = new Fuzzy( net );
   }
+  
   if ( isHypersphere( net ) ){
-    Hypersphere::trainART( net, x );
+    model = new Hypersphere( net, x );
   }
-
+  
+  ART::init( *model );
+  ART::train( *model, x );
+  
+  delete model;
+  
 }
 
-
 // [[Rcpp::export(.predictART)]]
-List predictART ( List net, int id, NumericMatrix x ){
-
-  List results;
+List predict ( List net, int id, NumericMatrix x ){
+  IModel *model;
+  
   if ( isFuzzy( net ) ){
-    results = Fuzzy::predictART( net, id, x );
-  }
-  if ( isHypersphere( net ) ){
-    results = Hypersphere::predictART( net, id, x );
+    model = new Fuzzy( net );
   }
 
+  if ( isHypersphere( net ) ){
+    model = new Hypersphere( net );
+  }
+
+  
+  List results = ART::predict( *model, id, x );
+  delete model;
   return results;
 }
 
 // [[Rcpp::export(.ART)]]
 List newART ( int dimension, int num = 1, double vigilance = 0.75, double learningRate = 1.0, int categorySize = 100, int maxEpochs = 20 ){
-  if ( vigilance < 0.0 || vigilance > 1.0 ){
-    stop( "The vigilance value must be between 0 and 1.0." );
-  }
-  if ( learningRate < 0.0 || learningRate > 1.0 ){
-    stop( "The learningRate value must be between 0 and 1.0." );
-  }
-  if ( num < 1 ){
-    stop( "The num value must be greater than 0." );
-  }
-  if ( categorySize < 1 ){
-    stop( "The categorySize value must be greater than 0." );
-  }
-  if ( maxEpochs < 1 ){
-    stop( "The maxEpochs value must be greater than 0." );
-  }
-  if ( dimension < 1 ){
-    stop( "The dimension value must be greater than 0." );
-  }
-  
-  List net = List::create( _["numModules"] = num,       // number of ART modules
-                           _["epochs"] = 0,             // total number of epochs required to learn
-                           _["maxEpochs"] = maxEpochs   // maximum number of epochs
-  );
-
-  List modules;
-  for ( int i = 0; i < num; i++ ){
-    modules.push_back( ART::module( i, dimension, vigilance, learningRate, categorySize ) );
-  }
-
-  net.push_back( modules, "module" );
-
-  net.attr( "class" ) = CharacterVector::create( "ART" );
-  return net;
-
+  return ART::create( dimension, num, vigilance, learningRate, categorySize, maxEpochs );
 }
 
 bool isART ( List net ){

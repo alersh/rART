@@ -1,53 +1,42 @@
 /****************************************************************************
- *
+ * 
  *  topoART.h
  *  TopoART and TopoARTMAP
- *
+ * 
+ *  by Albert Ler
+ *  © 2021
+ *  
  ****************************************************************************/
 
 #include <Rcpp.h>
+#include "IModel.h"
 using namespace Rcpp;
 using namespace std;
 
+#ifndef TOPOART_H
+#define TOPOART_H
 
 bool isTopoART ( List net );
 
 namespace Topo{
 
-  List module( int id, int numFeatures, double vigilance, int phi, double learningRate1, double learningRate2, int categorySize = 200 );
-  void learn ( List net,
-               int id,
-               NumericVector d,
-               NumericVector change,
-               std::function< double( List, NumericVector, NumericVector ) > activationFun,
-               std::function< double( List, NumericVector, NumericVector ) > matchFun,
-               std::function< NumericVector( List, NumericVector, NumericVector ) > weightUpdateFun );
+List module( int id, int dimension,double vigilance, int phi, double learningRate1, double learningRate2, int categorySize = 200 );
 
-  void train( List net,
-              NumericMatrix x,
-              std::function< NumericVector( NumericVector ) > codeFun,
-              std::function< double( List, NumericVector, NumericVector ) > activationFun,
-              std::function< double( List, NumericVector, NumericVector ) > matchFun,
-              std::function< NumericVector( List, NumericVector, NumericVector ) > weightUpdateFun );
+double rho ( double rho, int moduleId );
 
-  NumericVector classify( List net,
-                          int id,
-                          NumericVector d,
-                          std::function< double( List, NumericVector, NumericVector ) > activationFun,
-                          std::function< double( List, NumericVector, NumericVector ) > matchFun,
-                          NumericVector classified );
-  List predict ( List net,
-                 int id,
-                 NumericMatrix x,
-                 std::function< NumericVector( NumericVector ) > codeFun,
-                 std::function< double( List, NumericVector, NumericVector ) > activationFun,
-                 std::function< double( List, NumericVector, NumericVector ) > matchFun );
+void train ( IModel &model, NumericMatrix x );
+NumericVector classify ( IModel &model,
+                         int id,
+                         NumericVector d );
+List predict( IModel &model,
+              int id,
+              NumericMatrix x );
 
 }
 
 
-List TopoART ( int numFeatures, int num = 2, double vigilance = 0.9, int tau = 100, int phi = 6, double learningRate1 = 1.0, double learningRate2 = 0.6, int categorySize = 200, int maxEpochs = 20 );
+List TopoART ( int dimension, int num = 2, double vigilance = 0.9, double learningRate1 = 1.0, double learningRate2 = 0.6, int tau = 100, int phi = 6, int categorySize = 200, int maxEpochs = 20 );
 void topoTrain( List net, NumericMatrix x, Nullable< NumericVector > labels = R_NilValue );
 List topoPredict(  List net, int id, NumericMatrix x );
 
-
+#endif

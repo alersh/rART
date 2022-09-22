@@ -1,8 +1,8 @@
 Package: rART
 Type: Package
 Title: A collection of ART (Adaptive Resonance Theory) learning tools.
-Version: 0.4
-Date: 2021-08-02
+Version: 0.4.1.9000
+Date: 2022-09-03
 Author: Albert Ler
 Maintainer: Albert Ler <alersh@gmail.com>
 Description: Adaptive Resonance Theory is a neural network model originally developed by Stephen Grossberg. It behaves like a clustering algorithm but without the need to specify the number of clusters. Unlike the multilayer perceptrons, an ART system can continously learn new categories while retaining the old memories.

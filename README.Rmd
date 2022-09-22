@@ -59,6 +59,7 @@ The Fuzzy ART network has two hyperparameters: Learning rate ($\beta$) and vigil
 Here is an example of using Fuzzy ART to cluster different shapes:
 
 ```{r, fig.width = 7, fig.height = 4}
+library(mlbench)
 trainShapes <- mlbench.shapes(n = 5000)
 trainShapes$x <- normalize(trainShapes$x)
 art <- ART(rule = "fuzzy", dimension = 2, vigilance = 0.93) # create an ART object
@@ -74,19 +75,21 @@ Here is a circle-in-a-square classification problem solved with the simplified F
 
 
 ```{r, fig.width = 7, fig.height = 4}
+library(mlbench)
 # circle in a square
 trainCirSquare <- mlbench.circle(n = 10000)
 testCirSquare <- mlbench.circle(n = 1000)
 artmap <- ARTMAP(rule = "fuzzy", dimension = 2, vigilance = 0.8)
-train(artmap, trainCirSquare$x, as.numeric(trainCirSquare$classes))
-plot(artmap, .data = trainCirSquare$x, classes = trainCirSquare$classes) # create the 2 dimensional plot of the data and the weights
-p <- predict(artmap, .data = testCirSquare$x, target = as.numeric(testCirSquare$classes))
+train(artmap, normalize(trainCirSquare$x), as.numeric(trainCirSquare$classes))
+plot(artmap, .data = normalize(trainCirSquare$x), classes = trainCirSquare$classes) # create the 2 dimensional plot of the data and the weights
+p <- predict(artmap, .data = normalize(testCirSquare$x), target = as.numeric(testCirSquare$classes))
 sum(p$matched)/length(p$matched) * 100 # percent correct
 ```
 
 The user can also implement the standard fuzzy ARTMAP^2^. In this case, the user must first convert the class labels into dummy (binary) codes. rART provides two functions that aid the conversion. The createDummyCodeMap() takes the unique target labels and convert them to dummy codes. The function encodeLabel() converts all the target labels into dummy codes using this dummy code map. 
 
 ```{r, fig.width = 7, fig.height = 4}
+library(mlbench)
 # circle in a square
 trainCirSquare <- mlbench.circle(n = 10000)
 testCirSquare <- mlbench.circle(n = 1000)
@@ -94,9 +97,9 @@ artmap <- ARTMAP(rule = "fuzzy", dimension = 2, vigilance = 0.9, simplified = FA
 dummyMap <- createDummyCodeMap(unique(trainCirSquare$classes))
 trainCirSquare$dummyClasses <- encodeLabel(trainCirSquare$classes, dummyMap)
 testCirSquare$dummyClasses <- encodeLabel(testCirSquare$classes, dummyMap)
-train(artmap, trainCirSquare$x, trainCirSquare$dummyClasses)
-plot(artmap, .data = trainCirSquare$x, classes = trainCirSquare$dummyClasses, dummyCodeMap = dummyMap) # create the 2 dimensional plot of the data and the weights
-p <- predict(artmap, .data = testCirSquare$x, target = testCirSquare$dummyClasses)
+train(artmap, normalize(trainCirSquare$x), trainCirSquare$dummyClasses)
+plot(artmap, .data = normalize(trainCirSquare$x), classes = trainCirSquare$dummyClasses, dummyCodeMap = dummyMap) # create the 2 dimensional plot of the data and the weights
+p <- predict(artmap, .data = normalize(testCirSquare$x), target = testCirSquare$dummyClasses)
 sum(p$matched, na.rm = T)/length(p$matched) * 100 # percent correct
 ```
 
@@ -130,7 +133,7 @@ Here is an example of using TopoART to cluster a noisy smiley face. Notice the s
 ```{r, fig.width = 7, fig.height = 4}
 # smiley face
 data(noisySmiley)
-topoart <- TopoART(rule = "fuzzy", dimension = 2, vigilance = 0.88, tau = 200, phi = 5)
+topoart <- TopoART(rule = "fuzzy", dimension = 2, vigilance = 0.78, tau = 200, phi = 6)
 train(topoart, noisySmiley)
 plot(topoart, id = 0, noisySmiley) # the ART a module
 plot(topoart, id = 1, noisySmiley) # the ART b module
