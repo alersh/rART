@@ -9,7 +9,6 @@
 #include <Rcpp.h>
 #include "IModel.h"
 using namespace Rcpp;
-using namespace std;
 
 #ifndef ARTMAP_H
 #define ARTMAP_H

@@ -20,11 +20,10 @@
 #include "ART.h"
 #include "utils.h"
 using namespace Rcpp;
-using namespace std;
 #include "fuzzy.h"
 
 bool isFuzzy ( List net ){
-  return as<string>( net.attr( "rule" ) ).compare( "fuzzy" ) == 0;
+  return as<std::string>( net.attr( "rule" ) ).compare( "fuzzy" ) == 0;
 }
 
 Fuzzy::Fuzzy( List net ) : IModel( net ){}

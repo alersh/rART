@@ -7,15 +7,14 @@
 
 #include <Rcpp.h>
 using namespace Rcpp;
-using namespace std;
 
 
 // sortIndex: Sort the values in descending order and return the indices of the values
 NumericVector sortIndex( NumericVector x ){
   NumericVector idx( x.size() );
-  iota( idx.begin(), idx.end(), 0 );
+  std::iota( idx.begin(), idx.end(), 0 );
 
-  stable_sort( idx.begin(), idx.end(), [&x]( size_t i1, size_t i2 ) { return x[i1] > x[i2]; } );
+  std::stable_sort( idx.begin(), idx.end(), [&x]( size_t i1, size_t i2 ) { return x[i1] > x[i2]; } );
 
   return idx;
 }
@@ -150,12 +149,12 @@ List linkClusters( IntegerVector edges, IntegerVector nodes ){
     else{
       int edge1 = -1;
       int edge2 = -1;
-      vector< int > remove;
+      std::vector< int > remove;
       int len = g.length();
       for ( int j = 0; j < len; j++ ){
         IntegerVector v = g[j];
-        bool edge1Found = find( v.begin(), v.end(), edges( i ) ) != v.end();
-        bool edge2Found = find( v.begin(), v.end(), edges( i+1 ) ) != v.end();
+        bool edge1Found = std::find( v.begin(), v.end(), edges( i ) ) != v.end();
+        bool edge2Found = std::find( v.begin(), v.end(), edges( i+1 ) ) != v.end();
         if ( edge1Found && edge2Found ){
           edge1 = j;
           edge2 = j;
@@ -166,7 +165,7 @@ List linkClusters( IntegerVector edges, IntegerVector nodes ){
           for ( int k = 0; k < len; k++ ){
             if ( k != j ){
               IntegerVector w = g[k];
-              if ( find( w.begin(), w.end(), edges( i+1 ) ) != w.end() ){
+              if ( std::find( w.begin(), w.end(), edges( i+1 ) ) != w.end() ){
                 // if found, then push all the nodes in this vector into v
                 for ( int l : w ){
                   v.push_back( l );
@@ -186,7 +185,7 @@ List linkClusters( IntegerVector edges, IntegerVector nodes ){
           for ( int k = 0; k < len; k++ ){
             if ( k != j ){
               IntegerVector w = g[k];
-              if ( find( w.begin(), w.end(), edges( i+1 ) ) != w.end() ){
+              if ( std::find( w.begin(), w.end(), edges( i+1 ) ) != w.end() ){
                 for ( int l : w ){
                   v.push_back( l );
                 }
@@ -234,7 +233,7 @@ List linkClusters( IntegerVector edges, IntegerVector nodes ){
     bool found = false;
     for ( int j = 0; j < glen; j++ ){
       IntegerVector v = g[j];
-      if ( find( v.begin(), v.end(), nodes( i ) ) != v.end() ){
+      if ( std::find( v.begin(), v.end(), nodes( i ) ) != v.end() ){
         found = true;
         break;
       }
@@ -268,7 +267,7 @@ NumericMatrix encodeNumericLabel( IntegerVector labels, List code ){
   int col = as<IntegerVector>( code[0] ).length();
   NumericMatrix convert( l, col );
   for ( int i = 0; i < l; i++ ){
-    String s = to_string( labels[i] );
+    String s = std::to_string( labels[i] );
     convert( i, _ ) = as<IntegerVector>( code[s] );
   }
   return convert;
@@ -323,7 +322,7 @@ bool equal( NumericVector x, NumericVector y ){
 void printVector( NumericVector v ){
   int l = v.length();
   for ( int i = 0; i < l; i++ ){
-    cout << v[i] << " ";
+    std::cout << v[i] << " ";
   }
-  cout << endl;
+  std::cout << std::endl;
 }

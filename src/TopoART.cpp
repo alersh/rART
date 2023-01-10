@@ -18,11 +18,10 @@
 #include "fuzzy.h"
 #include "hypersphere.h"
 using namespace Rcpp;
-using namespace std;
 
 
 bool isTopoART ( List net ){
-  return as<string>( net.attr( "class" ) ).compare( "TopoART" ) == 0;
+  return as<std::string>( net.attr( "class" ) ).compare( "TopoART" ) == 0;
 }
 
 namespace Topo {
@@ -115,7 +114,7 @@ namespace Topo {
   
   void removeF2Nodes ( List module ){
     
-    vector <int> indices;
+    std::vector <int> indices;
     IntegerVector newIndices;
     int idx = 0;
     IntegerVector oldn = ART::getCounterVector( module );
@@ -224,7 +223,7 @@ namespace Topo {
     int l = linkedClusters.length();
     for ( int i = 0; i < l; i++ ){
       NumericVector c = as<NumericVector>( linkedClusters[i] );
-      if ( find( c.begin(), c.end(), category ) != c.end() ){
+      if ( std::find( c.begin(), c.end(), category ) != c.end() ){
         cluster = i;
         break;
       }
@@ -365,7 +364,7 @@ namespace Topo {
     
     init( model );
     
-    cout << "Training TopoART" << endl;
+    std::cout << "Training TopoART" << std::endl;
     
     int tau = 0;
     int epoch;
@@ -377,7 +376,7 @@ namespace Topo {
     bool complete = false; // if learning completes before the maximum epoch is reached
     
     for ( epoch = 1; epoch <= maxEpochs; epoch++ ){
-      cout << "Epoch no. " << epoch << endl;
+      std::cout << "Epoch no. " << epoch << std::endl;
       
       if ( isTopoART( model.net ) ){
         for ( int i = 0; i < nrow; i++ ){
@@ -395,7 +394,7 @@ namespace Topo {
           }
         }
         for ( int j = 0; j < numModules; j++ ){
-          cout << "ID " << j << " Number of changes: " << ART::getModuleChange( ART::getModule( model.net, j ) ) << endl;
+          std::cout << "ID " << j << " Number of changes: " << ART::getModuleChange( ART::getModule( model.net, j ) ) << std::endl;
         }
         if ( ART::getTotalChange( model.net ) == 0 ) {
           ART::setEpoch( model.net, epoch );
@@ -541,7 +540,7 @@ List TopoART ( int dimension, int num = 2, double vigilance = 0.9, double learni
     }
     else{
       net["numModules"] = as<int>( net["numModules"] ) - 1;
-      cout << "Module Id " << i << " cannot be created because its vigilance will be 0 or negative." << endl;
+      std::cout << "Module Id " << i << " cannot be created because its vigilance will be 0 or negative." << std::endl;
     }
     
   }

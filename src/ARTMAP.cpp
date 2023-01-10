@@ -12,11 +12,10 @@
 #include "fuzzy.h"
 #include "hypersphere.h"
 using namespace Rcpp;
-using namespace std;
 
 
 bool isARTMAP ( List net ){
-  return as<string>( net.attr( "class" ) ).compare( "ARTMAP" ) == 0;
+  return as<std::string>( net.attr( "class" ) ).compare( "ARTMAP" ) == 0;
 }
 
 namespace ARTMAP {
@@ -574,7 +573,7 @@ namespace ARTMAP {
       
       List mapfield = getMapfield( model.net );
       int change = ART::getTotalChange( model.net ) + ART::getModuleChange( mapfield );
-      cout << "Number of changes " << change << endl;
+      std::cout << "Number of changes " << change << std::endl;
       if ( change == 0 ) {
         ART::setEpoch( model.net, i );
         break;

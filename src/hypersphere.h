@@ -16,7 +16,6 @@
 #include <Rcpp.h>
 #include "IModel.h"
 using namespace Rcpp;
-using namespace std;
 
 #ifndef HYPERSPHERE_H
 #define HYPERSPHERE_H

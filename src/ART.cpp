@@ -11,7 +11,6 @@
 #include "fuzzy.h"
 #include "hypersphere.h"
 using namespace Rcpp;
-using namespace std;
 
 
 namespace ART {
@@ -88,7 +87,7 @@ namespace ART {
       }
       else{
         net["numModules"] = as<int>( net["numModules"] ) - 1;
-        cout << "Module Id " << i << " cannot be created because its vigilance will be 0 or negative." << endl;
+        std::cout << "Module Id " << i << " cannot be created because its vigilance will be 0 or negative." << std::endl;
       }
     }
     
@@ -448,13 +447,13 @@ namespace ART {
       std::cout << "Epoch no. " << i << std::endl;
       
       int id = getModule( model.net, 0 )["id"];
-      for (int i = 0; i < nrow; i++){
+      for ( int i = 0; i < nrow; i++ ){
         learn( model, id, model.processCode( x( i, _ ) ) );
       }
       
       for ( int j = 0; j < numModules; j++ ){
         int change = getModuleChange( ART::getModule( model.net, j ) );
-        cout << "ID " << j << " Number of changes: " << change << endl;
+        std::cout << "ID " << j << " Number of changes: " << change << std::endl;
       }
       if ( getTotalChange( model.net ) == 0 ) {
         ART::setEpoch( model.net, i );
@@ -553,6 +552,6 @@ List newART ( int dimension, int num = 1, double vigilance = 0.75, double learni
 }
 
 bool isART ( List net ){
-  return as<string>( net.attr( "class" ) ).compare( "ART" ) == 0;
+  return as<std::string>( net.attr( "class" ) ).compare( "ART" ) == 0;
 }
 

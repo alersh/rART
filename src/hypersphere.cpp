@@ -19,11 +19,10 @@
 #include "utils.h"
 #include "hypersphere.h"
 using namespace Rcpp;
-using namespace std;
 
 
 bool isHypersphere ( List net ){
-  return as<string>( net.attr( "rule" ) ).compare( "hypersphere" ) == 0;
+  return as<std::string>( net.attr( "rule" ) ).compare( "hypersphere" ) == 0;
 }
 
 Hypersphere::Hypersphere( List net ) : IModel( net ){}

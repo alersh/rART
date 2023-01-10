@@ -11,7 +11,6 @@
 #include <Rcpp.h>
 #include "IModel.h"
 using namespace Rcpp;
-using namespace std;
 
 #ifndef TOPOART_H
 #define TOPOART_H
