@@ -530,7 +530,9 @@ List TopoART ( int dimension, int num = 2, double vigilance = 0.9, double learni
                            _["dimension"] = dimension,  // number of features
                            _["epochs"] = 0,             // total number of epochs required to learn
                            _["maxEpochs"] = maxEpochs,  // maximum number of epochs
-                           _["tau"] = tau );            // number of learning cycles required before the F2 nodes with low counts are removed
+                           _["tau"] = tau,              // number of learning cycles required before the F2 nodes with low counts are removed
+                           _["init"] = 0                // initialize network
+  );
   
   List modules;
   for (int i = 0; i < num; i++){
@@ -562,7 +564,9 @@ void topoTrain( List net, NumericMatrix x, Nullable< NumericVector > labels = R_
     model = new Hypersphere( net, x );
   }
   
-  Topo::init( *model );
+  if ( !ART::isInitialized( net ) ) {
+    Topo::init( *model );
+  }
   Topo::train( *model, x );
   
   delete model;

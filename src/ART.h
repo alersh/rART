@@ -59,6 +59,7 @@ namespace ART {
         void counterReset( List module );
         void initModule( List module, int weightDimension );
         void init( IModel &model );
+        bool isInitialized( List net );
         
         NumericVector activation( IModel &model, List module, NumericVector x );
         double match( IModel &model, List module, int weightIndex , NumericVector x);

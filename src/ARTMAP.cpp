@@ -712,7 +712,9 @@ void trainARTMAP ( List net, NumericMatrix x, Nullable< NumericVector > vTarget 
     }
   }
   
-  ART::init( *model );
+  if ( !ART::isInitialized( net ) ){
+    ART::init( *model );
+  }
   ARTMAP::train( *model, x, vTarget, mTarget );
   
   delete model;

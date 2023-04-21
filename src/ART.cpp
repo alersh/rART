@@ -76,7 +76,8 @@ namespace ART {
                              _["dimension"] = dimension,  // number of features
                              _["epochs"] = 0,             // total number of epochs required to learn
                              _["maxEpochs"] = maxEpochs,  // maximum number of epochs
-                             _["activeModule"] = -1       // an index that keeps track of which module is currently active
+                             _["activeModule"] = -1,      // an index that keeps track of which module is currently active
+                             _["init"] = 0                // whether the net is initialized. 0 = not initialized; 1 = initialized
     );
     
     List modules;
@@ -296,6 +297,11 @@ namespace ART {
       List module = ART::getModule( model.net, i );
       initModule( module, model.getWeightDimension( getDimension( model.net ) ) );
     }
+    model.net["init"] = 1;
+  }
+
+  bool isInitialized( List net ){
+    return net["init"];
   }
   
   NumericVector activation( IModel &model, List module, NumericVector x ){
@@ -374,7 +380,6 @@ namespace ART {
           setJmax( module, J_max );
           weightUpdate( model, module, J_max, d );
           counterUpdate( module, J_max );
-          
           resonance = true;
           if ( hasMoreModules( model.net, id ) ){
             // match >= rho_a, then move up to the next module in the hierarchy
@@ -521,7 +526,9 @@ void train ( List net, NumericMatrix x ){
     model = new Hypersphere( net, x );
   }
   
-  ART::init( *model );
+  if ( !ART::isInitialized( net ) ) {
+    ART::init( *model );
+  }
   ART::train( *model, x );
   
   delete model;
