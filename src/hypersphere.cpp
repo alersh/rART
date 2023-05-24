@@ -59,9 +59,10 @@ int Hypersphere::getWeightDimension( int featureDimension ){
   return featureDimension + 1;
 }
 
-NumericVector Hypersphere::newWeight( NumericVector x ){
-  x.push_back(0);
-  return x;
+NumericVector Hypersphere::newWeight( NumericVector w ){
+  /* add the radius element to the new weight vector */
+  w.push_back(0);
+  return w;
 }
 
 double Hypersphere::activation( List module, NumericVector x, NumericVector w ){

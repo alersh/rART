@@ -18,7 +18,7 @@ struct Fuzzy : IModel {
   
   Fuzzy( List net );
   int getWeightDimension( int featureDimension );
-  NumericVector newWeight( NumericVector x );
+  NumericVector newWeight( NumericVector w );
   double activation( List module, NumericVector x, NumericVector w );
   double TopoPredictActivation (List module, NumericVector x, NumericVector w );
   double match(List module, NumericVector x, NumericVector w );

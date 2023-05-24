@@ -32,8 +32,8 @@ int Fuzzy::getWeightDimension( int featureDimension ){
   return featureDimension * 2;
 }
 
-NumericVector Fuzzy::newWeight( NumericVector x ){
-  return x;
+NumericVector Fuzzy::newWeight( NumericVector w ){
+  return w;
 }
 
 double Fuzzy::activation( List module, NumericVector x, NumericVector w ) {
@@ -57,7 +57,7 @@ NumericVector Fuzzy::weightUpdate( List module, double learningRate, NumericVect
   
 }
 
-// complementCode: Create complement code
+// processCode: Create complement code
 NumericVector Fuzzy::processCode( NumericVector x )  {
   int s = x.size();
   NumericVector c( s*2 );
