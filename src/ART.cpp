@@ -345,10 +345,12 @@ namespace ART {
       // reached the max capacity, so add more rows
       NumericMatrix newWeight = appendRows( wm, getCapacity( module ) );
       setWeightMatrix( module, newWeight );
-      
+    }
+    if ( numCategories == getCounterVector( module ).length() ){  
       IntegerVector n = appendVector( getCounterVector( module ), getCapacity( module ) );
       setCounterVector( module, n );
-      
+    }
+    if ( numCategories == getChangeVector( module ).length() ){
       IntegerVector c = appendVector( getChangeVector( module ), getCapacity( module ) );
       setChangeVector( module, c );
     }
