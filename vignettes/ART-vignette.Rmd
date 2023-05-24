@@ -134,7 +134,7 @@ Here is an example of using TopoART to cluster a noisy smiley face. Notice the s
 ```{r, fig.width = 7, fig.height = 4}
 # smiley face
 data(noisySmiley)
-topoart <- TopoART(rule = "fuzzy", dimension = 2, vigilance = 0.88, tau = 200, phi = 5)
+topoart <- TopoART(rule = "fuzzy", dimension = 2, vigilance = 0.78, tau = 200, phi = 6)
 train(topoart, noisySmiley)
 plot(topoart, id = 0, noisySmiley) # the ART a module
 plot(topoart, id = 1, noisySmiley) # the ART b module
