@@ -37,6 +37,10 @@
     .Call('_rART_topoPredict', PACKAGE = 'rART', net, id, x)
 }
 
+.createART1 <- function(net, L = 2) {
+    invisible(.Call('_rART_createART1', PACKAGE = 'rART', net, L))
+}
+
 linkClusters <- function(edges, nodes) {
     .Call('_rART_linkClusters', PACKAGE = 'rART', edges, nodes)
 }

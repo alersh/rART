@@ -7,12 +7,13 @@
 \title{Create an ARTMAP Network}
 \usage{
 ARTMAP(
-  rule = c("fuzzy", "hypersphere"),
+  rule = c("fuzzy", "hypersphere", "art1"),
   dimension,
   vigilance = 0.7,
   learningRate = 1,
   maxEpochs = 10,
-  simplified = TRUE
+  simplified = TRUE,
+  ...
 )
 
 isSimplified(net)
@@ -31,6 +32,8 @@ isARTMAP(net)
 \item{maxEpochs}{The maximum number of epochs. Default is 10.}
 
 \item{simplified}{Logical. Whether to run the simplified version of ARTMAP. Default is FALSE.}
+
+\item{...}{Other ART model specific parameters to be initialized.}
 
 \item{net}{An object}
 }

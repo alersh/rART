@@ -6,14 +6,25 @@
 #' @param dimension The number of dimension/features in the data.
 #' @param vigilance The vigilance parameter. Must be between 0 and 1.
 #' @param learningRate The learning rate. Must be between 0 and 1.
+#' @param maxEpochs The maximum number of epochs to run. Default is 10.
+#' @param ... Other ART model specific parameters to be initialized.
 #' @export
-ART <- function(numModules = 1, rule = c("fuzzy", "hypersphere"), dimension, vigilance = 0.7, learningRate = 1.0, maxEpochs = 10){
+ART <- function(numModules = 1, rule = c("fuzzy", "hypersphere", "art1"), dimension, vigilance = 0.7, learningRate = 1.0, maxEpochs = 10, ...){
+  
+  p <- list(...)
   
   rule <- match.arg(rule)
   
   art <- .ART( dimension, numModules, vigilance, learningRate, maxEpochs = maxEpochs)
   
-  attr(art, "rule") <- rule
+  if (rule == "art1"){
+    if (!is.null(p$L))
+      .createART1(art, L = p$L)
+    else
+      .createART1(art)
+  } else{
+    attr(art, "rule") <- rule
+  }
   
   return (art)
 }
@@ -49,14 +60,24 @@ TopoART <- function(numModules = 2, rule = c("fuzzy", "hypersphere"), dimension,
 #' @param learningRate The learning rate. Must be between 0 and 1.
 #' @param maxEpochs The maximum number of epochs. Default is 10.
 #' @param simplified Logical. Whether to run the simplified version of ARTMAP. Default is FALSE.
+#' @param ... Other ART model specific parameters to be initialized.
 #' @return ARTMAP returns an ARTMAP object.
 #' @export
-ARTMAP <- function(rule = c("fuzzy", "hypersphere"), dimension, vigilance = 0.7, learningRate = 1.0, maxEpochs = 10, simplified = TRUE){
+ARTMAP <- function(rule = c("fuzzy", "hypersphere", "art1"), dimension, vigilance = 0.7, learningRate = 1.0, maxEpochs = 10, simplified = TRUE, ...){
+  p <- list(...)
+  
   rule <- match.arg(rule)
 
   artmap <- .ARTMAP(dimension = dimension, vigilance = vigilance, learningRate = learningRate, maxEpochs = maxEpochs, simplified = simplified)
 
-  attr(artmap, "rule") <- rule
+  if (rule == "art1"){
+    if (!is.null(p$L))
+      .createART1(artmap, L = p$L)
+    else
+      .createART1(artmap)
+  } else{
+    attr(artmap, "rule") <- rule
+  }
 
   return (artmap)
 }

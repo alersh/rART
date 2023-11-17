@@ -10,6 +10,7 @@
 #include "ART.h"
 #include "utils.h"
 #include "fuzzy.h"
+#include "art1.h"
 #include "hypersphere.h"
 using namespace Rcpp;
 
@@ -686,7 +687,6 @@ List newARTMAP ( int dimension, int num = 1, double vigilance = 0.75, double lea
     net = newART( dimension, 1, vigilance, learningRate, categorySize, maxEpochs );
     as<List>( net["module"] ).attr( "names" ) = CharacterVector::create( "a" );
   }
-  //mapfield.push_back( ARTMAP::mapfield( 0, vigilance, learningRate, simplified ), "ab" );
   
   List mapfield = ARTMAP::mapfield( 0, vigilance = vigilance, learningRate = learningRate, categorySize = 50, simplified = simplified );
   net.push_back( mapfield, "mapfield" );
@@ -712,6 +712,10 @@ void trainARTMAP ( List net, NumericMatrix x, Nullable< NumericVector > vTarget 
     }
   }
   
+  if ( isART1( net ) ){
+    model = new ART1( net );
+  }
+  
   if ( !ART::isInitialized( net ) ){
     ART::init( *model );
   }
@@ -735,6 +739,10 @@ List predictARTMAP ( List net, NumericMatrix x, Nullable< NumericVector > vTarge
     else{
       stop( "The hypersphere model can only be used in the simplified ARTMAP." );
     }
+  }
+  
+  if ( isART1( net ) ){
+    model = new ART1( net );
   }
   
   List results = ARTMAP::predict( *model, x, vTarget, mTarget );

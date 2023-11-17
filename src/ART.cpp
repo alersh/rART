@@ -10,6 +10,7 @@
 #include "utils.h"
 #include "fuzzy.h"
 #include "hypersphere.h"
+#include "art1.h"
 using namespace Rcpp;
 
 
@@ -323,7 +324,6 @@ namespace ART {
     return a;
   }
   
-  
   void weightUpdate( IModel &model, List module, int weightIndex, NumericVector x ){
     
     NumericVector w_old = getWeight( module, weightIndex );
@@ -354,7 +354,7 @@ namespace ART {
       IntegerVector c = appendVector( getChangeVector( module ), getCapacity( module ) );
       setChangeVector( module, c );
     }
-    setWeight( module, newCategoryIndex, model.newWeight( x ) );
+    setWeight( module, newCategoryIndex, model.newWeight( module, x ) );
     counterUpdate( module, newCategoryIndex );
     incChange( module, newCategoryIndex );
     setNumCategories( module, newCategoryIndex + 1 );
@@ -527,6 +527,10 @@ void train ( List net, NumericMatrix x ){
   if ( isHypersphere( net ) ){
     model = new Hypersphere( net, x );
   }
+
+  if ( isART1( net ) ){
+    model = new ART1( net );
+  }
   
   if ( !ART::isInitialized( net ) ) {
     ART::init( *model );
@@ -549,7 +553,9 @@ List predict ( List net, int id, NumericMatrix x ){
     model = new Hypersphere( net );
   }
 
-  
+  if ( isART1( net ) ){
+    model = new ART1( net );
+  }
   List results = ART::predict( *model, id, x );
   delete model;
   return results;

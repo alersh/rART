@@ -7,11 +7,12 @@
 \usage{
 ART(
   numModules = 1,
-  rule = c("fuzzy", "hypersphere"),
+  rule = c("fuzzy", "hypersphere", "art1"),
   dimension,
   vigilance = 0.7,
   learningRate = 1,
-  maxEpochs = 10
+  maxEpochs = 10,
+  ...
 )
 
 isART(net)
@@ -26,6 +27,10 @@ isART(net)
 \item{vigilance}{The vigilance parameter. Must be between 0 and 1.}
 
 \item{learningRate}{The learning rate. Must be between 0 and 1.}
+
+\item{maxEpochs}{The maximum number of epochs to run. Default is 10.}
+
+\item{...}{Other ART model specific parameters to be initialized.}
 
 \item{net}{An object}
 }
