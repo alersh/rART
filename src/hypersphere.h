@@ -29,7 +29,7 @@ struct Hypersphere : IModel{
   double norm( NumericVector x, NumericVector m );
   double R_bar( NumericMatrix x );
   int getWeightDimension( int featureDimension );
-  NumericVector newWeight( NumericVector w );
+  NumericVector newWeight( List module, NumericVector w );
   double activation( List module, NumericVector x, NumericVector w );
   double TopoPredictActivation ( List module, NumericVector x, NumericVector w );
   double match( List module, NumericVector x, NumericVector w );

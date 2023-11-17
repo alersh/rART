@@ -32,7 +32,7 @@ int Fuzzy::getWeightDimension( int featureDimension ){
   return featureDimension * 2;
 }
 
-NumericVector Fuzzy::newWeight( NumericVector w ){
+NumericVector Fuzzy::newWeight( List module, NumericVector w ){
   return w;
 }
 

@@ -17,7 +17,7 @@ struct IModel{
   /* newWeight:  additional set up for the new weight vector. For example, for the hypersphere model
      the weight vector needs to append a radius element to the end of the new weight vector. This can 
      be done here. */
-  virtual NumericVector newWeight( NumericVector w ) = 0;
+  virtual NumericVector newWeight( List module, NumericVector w ) = 0;
   
   /* activation: Calculate the activation values */
   virtual double activation( List module, NumericVector x, NumericVector w ) = 0;
