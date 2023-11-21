@@ -46,7 +46,8 @@ namespace ART {
   double rho ( double rho, int moduleId ){
     
     for ( int i = 1; i <= moduleId; i++ ){
-      rho = 0.5*( rho + 1 );
+      rho = rho*2 - 1;
+      //rho = 0.5*( rho + 1 );
     }
     
     return rho;
@@ -55,9 +56,6 @@ namespace ART {
   List create ( int dimension, int num = 1, double vigilance = 0.75, double learningRate = 1.0, int categorySize = 100, int maxEpochs = 20 ){
     if ( vigilance < 0.0 || vigilance > 1.0 ){
       stop( "The vigilance value must be between 0 and 1.0." );
-    }
-    if ( learningRate < 0.0 || learningRate > 1.0 ){
-      stop( "The learningRate value must be between 0 and 1.0." );
     }
     if ( num < 1 ){
       stop( "The num value must be greater than 0." );
@@ -83,7 +81,9 @@ namespace ART {
     
     List modules;
     for ( int i = 0; i < num; i++ ){
-      vigilance = ART::rho( vigilance, i );
+      if ( i > 0 ){
+        vigilance = ART::rho( vigilance, i );
+      }
       if ( vigilance > 0 ){
         modules.push_back( ART::module( i, vigilance, learningRate, categorySize ) );
       }
@@ -387,7 +387,7 @@ namespace ART {
             // match >= rho_a, then move up to the next module in the hierarchy
             // the weight of this node will be the input for the next module
             
-            learn( model, id+1, d );
+            learn( model, id+1, model.getNextLayerInput( getWeight( module, J_max ) ) );
           }
         }
         else{
@@ -398,7 +398,7 @@ namespace ART {
               // match >= rho_a, then move up to the next module in the hierarchy
               // the weight of this node will be the input for the next module
               // NumericVector w =  as<NumericMatrix>( module["w"] )( J_max, _ );
-              learn( model, id+1, d );
+              learn( model, id+1, model.getNextLayerInput( getWeight( module, J_max ) ) );
             }
           }
           else{
