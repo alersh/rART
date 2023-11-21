@@ -13,7 +13,7 @@ using namespace Rcpp;
 #define ART1_H
 
 bool isART1 ( List net );
-void createART1( List net, double L );
+void checkART1Bounds( List net );
 
 struct ART1 : IModel {
   
@@ -28,6 +28,7 @@ struct ART1 : IModel {
   double activation( List module, NumericVector x, NumericVector w );
   double match(List module, NumericVector x, NumericVector w );
   NumericVector weightUpdate( List module, double learningRate, NumericVector x, NumericVector w );
+  NumericVector getNextLayerInput( NumericVector w );
   NumericVector processCode( NumericVector x );
   NumericVector unProcessCode( NumericVector x );
   NumericMatrix normalizeCode( NumericMatrix x );

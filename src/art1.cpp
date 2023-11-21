@@ -21,19 +21,17 @@ bool isART1 ( List net ){
   return as<std::string>( net.attr( "rule" ) ).compare( "ART1" ) == 0;
 }
 
-// [[Rcpp::export(.createART1)]]
-void createART1( List net, double L = 2 ){
-  if ( !isART( net ) && !isARTMAP( net ) ){
-    stop( "The argument net must be an ART object." );
-  }
+// [[Rcpp::export(.checkART1Bounds)]]
+void checkART1Bounds ( List net ){
+  
   int numModules = ART::getNumModules( net );
   for ( int i = 0; i < numModules; i++ ){
     List module = ART::getModule( net, i );
-    module.push_back( L, "L" );
-    module.attr( "rule" ) = "ART1";
-    ART::setModule( net, module );
+    double learningRate = ART::getLearningRate( module );
+    if ( learningRate < 0.0 ){
+      stop( "The learningRate value must be larger than 0." );
+    }
   }
-  net.attr( "rule" ) = "ART1";
 }
 
 ART1::ART1( List net ) : IModel( net ){}
@@ -82,7 +80,8 @@ NumericVector ART1::updateWtd( NumericVector x, NumericVector w_bu ){
 }
 
 NumericVector ART1::updateWbu( List module, NumericVector w_td ){
-  double L = as<double>( module["L"] );
+  //double L = as<double>( module["L"] );
+  double L = ART::getLearningRate( module );
   return L/( L - 1 + sum( w_td ) ) * w_td;
 }
 
@@ -97,12 +96,17 @@ NumericVector ART1::weightUpdate( List module, double learningRate, NumericVecto
   int dim = ART::getWeightDimension( module );
   NumericVector w_td = getWtd( w );
   NumericVector w_td_new = intersect( x, w_td );
-  double L = as<double>( module["L"] );
+  //double L = as<double>( module["L"] );
+  double L = ART::getLearningRate( module );
   NumericVector w_bu_new = updateWbu( module, w_td_new );
   
   NumericVector w_new = joinVectors( w_bu_new, w_td_new );
   
   return w_new;
+}
+
+NumericVector ART1::getNextLayerInput( NumericVector w ){
+  return w;
 }
 
 NumericVector ART1::processCode( NumericVector x )  {
