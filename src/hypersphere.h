@@ -21,6 +21,7 @@ using namespace Rcpp;
 #define HYPERSPHERE_H
 
 bool isHypersphere ( List net );
+void checkHypersphereBounds ( List net );
 
 struct Hypersphere : IModel{
   Hypersphere( List net );
@@ -34,6 +35,7 @@ struct Hypersphere : IModel{
   double TopoPredictActivation ( List module, NumericVector x, NumericVector w );
   double match( List module, NumericVector x, NumericVector w );
   NumericVector weightUpdate( List module, double learningRate, NumericVector x, NumericVector w );
+  NumericVector getNextLayerInput( NumericVector w );
   NumericVector processCode( NumericVector x );
   NumericVector unProcessCode( NumericVector x );
   

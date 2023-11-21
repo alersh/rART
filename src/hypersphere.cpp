@@ -24,7 +24,18 @@ using namespace Rcpp;
 bool isHypersphere ( List net ){
   return as<std::string>( net.attr( "rule" ) ).compare( "hypersphere" ) == 0;
 }
-
+// [[Rcpp::export(.checkHypersphereBounds)]]
+void checkHypersphereBounds ( List net ){
+  
+  int numModules = ART::getNumModules( net );
+  for ( int i = 0; i < numModules; i++ ){
+    List module = ART::getModule( net, i );
+    double learningRate = ART::getLearningRate( module );
+    if ( learningRate < 0.0 || learningRate > 1.0 ){
+      stop( "The learningRate value must be between 0 and 1." );
+    }
+  }
+}
 Hypersphere::Hypersphere( List net ) : IModel( net ){}
 
 Hypersphere::Hypersphere( List net, NumericMatrix x ) : IModel( net ){
@@ -113,6 +124,10 @@ NumericVector Hypersphere::weightUpdate( List module, double learningRate, Numer
   Rnew = R + learningRate/2 * ( maximum - R );
   mnew.push_back( Rnew );
   return mnew;
+}
+
+NumericVector Hypersphere::getNextLayerInput( NumericVector w ){
+  return w[ Range( 0, w.length() - 2 ) ];
 }
 
 NumericVector Hypersphere::processCode( NumericVector x ) {
