@@ -9,22 +9,21 @@
 #' @param maxEpochs The maximum number of epochs to run. Default is 10.
 #' @param ... Other ART model specific parameters to be initialized.
 #' @export
-ART <- function(numModules = 1, rule = c("fuzzy", "hypersphere", "art1"), dimension, vigilance = 0.7, learningRate = 1.0, maxEpochs = 10, ...){
+ART <- function(numModules = 1, rule = c("fuzzy", "hypersphere", "ART1"), dimension, vigilance = 0.7, learningRate = 1.0, maxEpochs = 10, ...){
   
   p <- list(...)
   
   rule <- match.arg(rule)
-  
+ 
   art <- .ART( dimension, numModules, vigilance, learningRate, maxEpochs = maxEpochs)
   
-  if (rule == "art1"){
-    if (!is.null(p$L))
-      .createART1(art, L = p$L)
-    else
-      .createART1(art)
-  } else{
-    attr(art, "rule") <- rule
-  }
+  switch(rule,
+         "fuzzy" = .checkFuzzyBounds(art),
+         "hypersphere" = .checkHypersphereBounds(art),
+         "ART1" = .checkART1Bounds(art)
+         )
+  
+  attr(art, "rule") <- rule
   
   return (art)
 }
@@ -45,6 +44,7 @@ TopoART <- function(numModules = 2, rule = c("fuzzy", "hypersphere"), dimension,
   if (numModules < 2){
     stop("The number of modules must be at least 2.")
   }
+  
   topoART <- .TopoART(dimension, numModules, vigilance, learningRate1, learningRate2, tau, phi, maxEpochs = maxEpochs)
   
   attr(topoART, "rule") <- rule
@@ -63,22 +63,21 @@ TopoART <- function(numModules = 2, rule = c("fuzzy", "hypersphere"), dimension,
 #' @param ... Other ART model specific parameters to be initialized.
 #' @return ARTMAP returns an ARTMAP object.
 #' @export
-ARTMAP <- function(rule = c("fuzzy", "hypersphere", "art1"), dimension, vigilance = 0.7, learningRate = 1.0, maxEpochs = 10, simplified = TRUE, ...){
+ARTMAP <- function(rule = c("fuzzy", "hypersphere", "ART1"), dimension, vigilance = 0.7, learningRate = 1.0, maxEpochs = 10, simplified = TRUE, ...){
   p <- list(...)
   
   rule <- match.arg(rule)
-
+ 
   artmap <- .ARTMAP(dimension = dimension, vigilance = vigilance, learningRate = learningRate, maxEpochs = maxEpochs, simplified = simplified)
 
-  if (rule == "art1"){
-    if (!is.null(p$L))
-      .createART1(artmap, L = p$L)
-    else
-      .createART1(artmap)
-  } else{
-    attr(artmap, "rule") <- rule
-  }
-
+  switch(rule,
+         "fuzzy" = .checkFuzzyBounds(artmap),
+         "hypersphere" = .checkHypersphereBounds(artmap),
+         "ART1" = .checkART1Bounds(artmap)
+  )
+  
+  attr(artmap, "rule") <- rule
+  
   return (artmap)
 }
 

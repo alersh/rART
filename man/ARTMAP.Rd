@@ -7,7 +7,7 @@
 \title{Create an ARTMAP Network}
 \usage{
 ARTMAP(
-  rule = c("fuzzy", "hypersphere", "art1"),
+  rule = c("fuzzy", "hypersphere", "ART1"),
   dimension,
   vigilance = 0.7,
   learningRate = 1,
