@@ -37,8 +37,16 @@
     .Call('_rART_topoPredict', PACKAGE = 'rART', net, id, x)
 }
 
-.createART1 <- function(net, L = 2) {
-    invisible(.Call('_rART_createART1', PACKAGE = 'rART', net, L))
+.checkART1Bounds <- function(net) {
+    invisible(.Call('_rART_checkART1Bounds', PACKAGE = 'rART', net))
+}
+
+.checkFuzzyBounds <- function(net) {
+    invisible(.Call('_rART_checkFuzzyBounds', PACKAGE = 'rART', net))
+}
+
+.checkHypersphereBounds <- function(net) {
+    invisible(.Call('_rART_checkHypersphereBounds', PACKAGE = 'rART', net))
 }
 
 linkClusters <- function(edges, nodes) {
