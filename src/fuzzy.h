@@ -13,6 +13,7 @@ using namespace Rcpp;
 #define FUZZY_H
 
 bool isFuzzy ( List net );
+void checkFuzzyBounds ( List net );
 
 struct Fuzzy : IModel {
   
@@ -23,6 +24,7 @@ struct Fuzzy : IModel {
   double TopoPredictActivation (List module, NumericVector x, NumericVector w );
   double match(List module, NumericVector x, NumericVector w );
   NumericVector weightUpdate( List module, double learningRate, NumericVector x, NumericVector w );
+  NumericVector getNextLayerInput( NumericVector w );
   NumericVector processCode( NumericVector x );
   NumericVector unProcessCode( NumericVector x );
   NumericMatrix normalizeCode( NumericMatrix x );

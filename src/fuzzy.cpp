@@ -26,6 +26,19 @@ bool isFuzzy ( List net ){
   return as<std::string>( net.attr( "rule" ) ).compare( "fuzzy" ) == 0;
 }
 
+// [[Rcpp::export(.checkFuzzyBounds)]]
+void checkFuzzyBounds ( List net ){
+  
+  int numModules = ART::getNumModules( net );
+  for ( int i = 0; i < numModules; i++ ){
+    List module = ART::getModule( net, i );
+    double learningRate = ART::getLearningRate( module );
+    if ( learningRate < 0.0 || learningRate > 1.0 ){
+      stop( "The learningRate value must be between 0 and 1." );
+    }
+  }
+}
+
 Fuzzy::Fuzzy( List net ) : IModel( net ){}
 
 int Fuzzy::getWeightDimension( int featureDimension ){
@@ -56,6 +69,8 @@ NumericVector Fuzzy::weightUpdate( List module, double learningRate, NumericVect
   return learningRate * pmin( x, w ) + ( 1.0 - learningRate ) * w;
   
 }
+
+NumericVector Fuzzy::getNextLayerInput( NumericVector w ){ return w ; }
 
 // processCode: Create complement code
 NumericVector Fuzzy::processCode( NumericVector x )  {
