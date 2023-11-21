@@ -138,14 +138,33 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// createART1
-void createART1(List net, double L);
-RcppExport SEXP _rART_createART1(SEXP netSEXP, SEXP LSEXP) {
+// checkART1Bounds
+void checkART1Bounds(List net);
+RcppExport SEXP _rART_checkART1Bounds(SEXP netSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< List >::type net(netSEXP);
-    Rcpp::traits::input_parameter< double >::type L(LSEXP);
-    createART1(net, L);
+    checkART1Bounds(net);
+    return R_NilValue;
+END_RCPP
+}
+// checkFuzzyBounds
+void checkFuzzyBounds(List net);
+RcppExport SEXP _rART_checkFuzzyBounds(SEXP netSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< List >::type net(netSEXP);
+    checkFuzzyBounds(net);
+    return R_NilValue;
+END_RCPP
+}
+// checkHypersphereBounds
+void checkHypersphereBounds(List net);
+RcppExport SEXP _rART_checkHypersphereBounds(SEXP netSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< List >::type net(netSEXP);
+    checkHypersphereBounds(net);
     return R_NilValue;
 END_RCPP
 }
@@ -221,7 +240,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_rART_TopoART", (DL_FUNC) &_rART_TopoART, 9},
     {"_rART_topoTrain", (DL_FUNC) &_rART_topoTrain, 3},
     {"_rART_topoPredict", (DL_FUNC) &_rART_topoPredict, 3},
-    {"_rART_createART1", (DL_FUNC) &_rART_createART1, 2},
+    {"_rART_checkART1Bounds", (DL_FUNC) &_rART_checkART1Bounds, 1},
+    {"_rART_checkFuzzyBounds", (DL_FUNC) &_rART_checkFuzzyBounds, 1},
+    {"_rART_checkHypersphereBounds", (DL_FUNC) &_rART_checkHypersphereBounds, 1},
     {"_rART_linkClusters", (DL_FUNC) &_rART_linkClusters, 2},
     {"_rART_createDummyCodeMap", (DL_FUNC) &_rART_createDummyCodeMap, 1},
     {"_rART_encodeNumericLabel", (DL_FUNC) &_rART_encodeNumericLabel, 2},
