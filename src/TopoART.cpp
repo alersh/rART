@@ -536,7 +536,9 @@ List TopoART ( int dimension, int num = 2, double vigilance = 0.9, double learni
   
   List modules;
   for (int i = 0; i < num; i++){
-    vigilance = Topo::rho( vigilance, i );
+    if ( i > 0 ){
+      vigilance = Topo::rho( vigilance, i );
+    }
     if ( vigilance > 0 ){
       modules.push_back( Topo::module( i, vigilance, phi, learningRate1, learningRate2, categorySize ) );
     }
