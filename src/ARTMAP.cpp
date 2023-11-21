@@ -665,9 +665,6 @@ List newARTMAP ( int dimension, int num = 1, double vigilance = 0.75, double lea
     stop( "The vigilance value must be between 0 and 1.0." );
   }
   
-  if ( learningRate < 0.0 || learningRate > 1.0 ){
-    stop( "The learningRate value must be between 0 and 1.0." );
-  }
   if ( categorySize < 1 ){
     stop( "The categorySize value must be greater than 0." );
   }
