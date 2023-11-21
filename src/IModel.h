@@ -28,6 +28,13 @@ struct IModel{
   /* weightUpdate: Update the weight vector */
   virtual NumericVector weightUpdate( List module, double learningRate, NumericVector x, NumericVector w ) = 0;
   
+  /* For hierarchical clustering: get the input for the next layer from the weight. The weight
+   * may need to be processed before making it to the next layer. E.g. the hypersphere weight
+   * contains both the input values + radius. Using this weight as input for the next layer requires
+   * the radius to be stripped from the weight.
+   */
+  virtual NumericVector getNextLayerInput( NumericVector w ){ return w ; };
+   
   /* processCode: The processing of the input code specific for this model. For example,
      the fuzzy model requires code complement and it can be done here. */
   virtual NumericVector processCode( NumericVector x ) { return x; };
