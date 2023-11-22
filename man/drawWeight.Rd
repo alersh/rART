@@ -4,10 +4,14 @@
 \alias{drawWeight}
 \title{drawWeight}
 \usage{
-drawWeight(x, ...)
+drawWeight(w, x, y, ...)
 }
 \arguments{
-\item{x}{An ART object}
+\item{w}{The weight object}
+
+\item{x}{The x axis variable}
+
+\item{y}{The y axis variable}
 
 \item{...}{Additional arguments to be passed}
 }

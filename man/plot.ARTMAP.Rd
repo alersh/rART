@@ -4,12 +4,18 @@
 \alias{plot.ARTMAP}
 \title{plot.ARTMAP}
 \usage{
-\method{plot}{ARTMAP}(net, .data, classes = NULL, dummyCodeMap = NULL)
+\method{plot}{ARTMAP}(net, .data, x = NULL, y = NULL, classes = NULL, dummyCodeMap = NULL)
 }
 \arguments{
 \item{net}{An ARTMAP network}
 
 \item{.data}{The data frame used for plotting the data. It must have 2 columns specifying x and y values.}
+
+\item{x}{The variable to plot along the x axis. If it is not specified, then the first column of the data and the weight matrix
+will be used.}
+
+\item{y}{The variable to plot along the y axis. If it is not specified, then the second column of the data and the weight matrix
+will be used.}
 
 \item{classes}{The class labels associated with the data points.}
 

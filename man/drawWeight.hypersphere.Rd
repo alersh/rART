@@ -4,7 +4,7 @@
 \alias{drawWeight.hypersphere}
 \title{drawWeight.hypersphere}
 \usage{
-\method{drawWeight}{hypersphere}(w, classLabels = NULL)
+\method{drawWeight}{hypersphere}(w, x, y, classLabels = NULL)
 }
 \arguments{
 \item{w}{The data frame with the first 2 columns being x and y coordinates of the weight, and the third column being the radii.}

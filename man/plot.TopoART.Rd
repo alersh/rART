@@ -4,7 +4,7 @@
 \alias{plot.TopoART}
 \title{plot.TopoART}
 \usage{
-\method{plot}{TopoART}(net, id = 0, .data)
+\method{plot}{TopoART}(net, id = 0, .data, x = NULL, y = NULL)
 }
 \arguments{
 \item{net}{A TopoART network}
@@ -13,6 +13,12 @@
 
 \item{.data}{The data frame used for plotting the data. It must have 2 columns corresponding to the x values and y values, respectively.
 If .data has more than 2 columns, only the first 2 columns will be used.}
+
+\item{x}{The variable to plot along the x axis. If it is not specified, then the first column of the data and the weight matrix
+will be used.}
+
+\item{y}{The variable to plot along the y axis. If it is not specified, then the second column of the data and the weight matrix
+will be used.}
 }
 \value{
 A ggplot

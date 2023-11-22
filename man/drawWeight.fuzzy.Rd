@@ -4,10 +4,14 @@
 \alias{drawWeight.fuzzy}
 \title{drawWeight.fuzzy}
 \usage{
-\method{drawWeight}{fuzzy}(w, classLabels = NULL)
+\method{drawWeight}{fuzzy}(w, x, y, classLabels = NULL)
 }
 \arguments{
 \item{w}{The weight matrix}
+
+\item{x}{The x axis variable}
+
+\item{y}{The y axis variable}
 
 \item{classLabels}{The vector of class labels associated with all weights in F2}
 }

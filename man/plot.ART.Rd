@@ -4,7 +4,7 @@
 \alias{plot.ART}
 \title{plot.ART}
 \usage{
-\method{plot}{ART}(net, id = 0, .data)
+\method{plot}{ART}(net, id = 0, .data, x = NULL, y = NULL)
 }
 \arguments{
 \item{net}{An ART network}
@@ -12,6 +12,12 @@
 \item{id}{The numeric id of the module to be plotted. The base module ART a (default) has an id = 0. The ids of the higher order module are incremented.}
 
 \item{.data}{The data frame used for plotting the data. It must have 2 columns corresponding to the x and y values, respectively.}
+
+\item{x}{The variable to plot along the x axis. If it is not specified, then the first column of the data and the weight matrix
+will be used.}
+
+\item{y}{The variable to plot along the y axis. If it is not specified, then the second column of the data and the weight matrix
+will be used.}
 }
 \value{
 A ggplot
