@@ -11,6 +11,9 @@
 
 \item{.data}{The data used for training.}
 }
+\value{
+The TopoART object
+}
 \description{
 The TopoART training method
 }

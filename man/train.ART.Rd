@@ -11,6 +11,9 @@
 
 \item{.data}{The data used for training.}
 }
+\value{
+The ART object
+}
 \description{
 The ART training method
 }

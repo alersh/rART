@@ -93,18 +93,24 @@ train <- function(network, ...){
 #' @description The ART training method
 #' @param network An ART  object
 #' @param .data The data used for training.
+#' @return The ART object
 #' @export
 train.ART <- function(network, .data){
   .trainART(network, .data)
+  network <- addWeightColumnNames(network, colnames(.data))
+  return (network)
 }
 
 #' Train a Topological ART Network
 #' @description The TopoART training method
 #' @param network An TopoART  object
 #' @param .data The data used for training.
+#' @return The TopoART object
 #' @export
 train.TopoART <- function(network, .data){
   .topoTrain(network, .data)
+  network <- addWeightColumnNames(network, colnames(.data))
+  return (network)
 }
 
 #' Train an ARTMAP Network
@@ -114,6 +120,7 @@ train.TopoART <- function(network, .data){
 #' @param target Either a numeric vector or a matrix. Use the vector form when running the simplified ARTMAP classification. Use the matrix 
 #' form when running the standard ARTMAP classification where the target labels must be binary values. For regression which requires the 
 #' standard ARTMAP, either a vector or a matrix (single column) of continuous values (normalized between 0 and 1) can be used.
+#' @return The ARTMAP object
 #' @export
 train.ARTMAP <- function(network, .data, target){
   if (missing(target)){
@@ -136,6 +143,30 @@ train.ARTMAP <- function(network, .data, target){
     # it is a matrix
     .trainARTMAP(network, .data, vTarget = NULL, mTarget = target)
   }
+  network <- addWeightColumnNames(network, colnames(.data))
+  return (network)
+}
+
+#' Add column names to the weight matrix
+#' @description Depending on the rule, add the column names in the data to the weight
+#' matrix. For the fuzzy rule, the column names of the data and their complement (with _c)
+#' attached to the names are added. For the hypersphere rule, the column names and the radius
+#' column "R" are added. For ART1, the bottom up and top down weight columns are specified by
+#' the tags "_bu" and "_td".
+#' @param network The ART object
+#' @param columnNames The column names to be added to the weight matrix.
+#' @return The weight matrix with the column names
+#' @export
+addWeightColumnNames <- function(network, columnNames){
+  rule <- getRule(network)
+  for (i in 1:length(network$module)){
+    colnames(network$module[[i]]$w) <- switch(rule,
+                                              "fuzzy" = c(columnNames, paste0(columnNames, "_c")),
+                                              "hypersphere" = c(columnNames, "R"),
+                                              "ART1" = c(paste0(columnNames, "_bu"), paste0(columnNames, "_td"))
+    )
+  }
+  return (network)
 }
 
 #' ART Prediction

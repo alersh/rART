@@ -15,6 +15,9 @@
 form when running the standard ARTMAP classification where the target labels must be binary values. For regression which requires the 
 standard ARTMAP, either a vector or a matrix (single column) of continuous values (normalized between 0 and 1) can be used.}
 }
+\value{
+The ARTMAP object
+}
 \description{
 The ARTMAP training method
 }
