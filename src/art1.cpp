@@ -6,7 +6,9 @@
  *
  *
  *  References:
- *  
+ *  1. da Silva, L.E.B, Elnabarawy, I., and Wunsch II, D.C. (2019) "A survey of 
+ *  Adaptive Resonance Theory neural network models for engineering applications", 
+ *  Neural Networks, 120, pp 167 - 203.
  *
  ****************************************************************************/
 
