@@ -27,7 +27,7 @@ ART also shows several advantages over other machine learning models. These incl
 
 1. online learning, 
 2. fast learning,
-3. explanable.
+3. explainable.
 
 For a comprehensive review of ART and its variants, please read da Silva et al., 2019 ^4^.
 
