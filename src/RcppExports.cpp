@@ -228,7 +228,7 @@ BEGIN_RCPP
 END_RCPP
 }
 
-RcppExport SEXP run_testthat_tests(SEXP);
+RcppExport SEXP run_testthat_tests(void *);
 
 static const R_CallMethodDef CallEntries[] = {
     {"_rART_train", (DL_FUNC) &_rART_train, 2},
