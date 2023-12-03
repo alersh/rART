@@ -454,8 +454,8 @@ namespace ART {
       std::cout << "Epoch no. " << i << std::endl;
       
       int id = getModule( model.net, 0 )["id"];
-      for ( int i = 0; i < nrow; i++ ){
-        learn( model, id, model.processCode( x( i, _ ) ) );
+      for ( int k = 0; k < nrow; k++ ){
+        learn( model, id, model.processCode( x( k, _ ) ) );
       }
       
       for ( int j = 0; j < numModules; j++ ){
@@ -471,8 +471,8 @@ namespace ART {
           // that way if the user wants to stop the learning using fewer epochs
           // then the node counters are still available for inspection
           int n  = getNumModules( model.net );
-          for ( int i = 0; i < n; i++ ){
-            List module = getModule( model.net, i );
+          for ( int j = 0; j < n; j++ ){
+            List module = getModule( model.net, j );
             counterReset( module );
             changeReset( module );
           }
