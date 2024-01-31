@@ -398,7 +398,7 @@ namespace ART {
               // match >= rho_a, then move up to the next module in the hierarchy
               // the weight of this node will be the input for the next module
               // NumericVector w =  as<NumericMatrix>( module["w"] )( J_max, _ );
-              learn( model, id+1, model.getNextLayerInput( getWeight( module, J_max ) ) );
+              learn( model, id+1, model.getNextLayerInput( getWeight( module, j+1 ) ) );
             }
           }
           else{
