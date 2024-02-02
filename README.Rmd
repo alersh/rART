@@ -61,9 +61,10 @@ Here is an example of using Fuzzy ART to cluster different shapes:
 ```{r, fig.width = 7, fig.height = 4}
 library(mlbench)
 trainShapes <- mlbench.shapes(n = 5000)
-trainShapes$x <- normalize(trainShapes$x)
+trainShapes$x <- normalize(trainShapes$x) 
+colnames(trainShapes$x) <- c("x", "y")
 art <- ART(rule = "fuzzy", dimension = 2, vigilance = 0.93) # create an ART object
-train(art, as.matrix(trainShapes$x)) 
+art <- train(art, as.matrix(trainShapes$x)) 
 plot(art, id = 0, .data = trainShapes$x) # plot the data and the weights.
 ```
 
@@ -78,9 +79,11 @@ Here is a circle-in-a-square classification problem solved with the simplified F
 library(mlbench)
 # circle in a square
 trainCirSquare <- mlbench.circle(n = 10000)
+colnames(trainCirSquare$x) <- c("x", "y")
 testCirSquare <- mlbench.circle(n = 1000)
+colnames(testCirSquare$x) <- c("x", "y")
 artmap <- ARTMAP(rule = "fuzzy", dimension = 2, vigilance = 0.8)
-train(artmap, normalize(trainCirSquare$x), as.numeric(trainCirSquare$classes))
+artmap <- train(artmap, normalize(trainCirSquare$x), as.numeric(trainCirSquare$classes))
 plot(artmap, .data = normalize(trainCirSquare$x), classes = trainCirSquare$classes) # create the 2 dimensional plot of the data and the weights
 p <- predict(artmap, .data = normalize(testCirSquare$x), target = as.numeric(testCirSquare$classes))
 sum(p$matched)/length(p$matched) * 100 # percent correct
@@ -92,12 +95,14 @@ The user can also implement the standard fuzzy ARTMAP^2^. In this case, the user
 library(mlbench)
 # circle in a square
 trainCirSquare <- mlbench.circle(n = 10000)
+colnames(trainCirSquare$x) <- c("x", "y")
 testCirSquare <- mlbench.circle(n = 1000)
+colnames(testCirSquare$x) <- c("x", "y")
 artmap <- ARTMAP(rule = "fuzzy", dimension = 2, vigilance = 0.9, simplified = FALSE)
 dummyMap <- createDummyCodeMap(unique(trainCirSquare$classes))
 trainCirSquare$dummyClasses <- encodeLabel(trainCirSquare$classes, dummyMap)
 testCirSquare$dummyClasses <- encodeLabel(testCirSquare$classes, dummyMap)
-train(artmap, normalize(trainCirSquare$x), trainCirSquare$dummyClasses)
+artmap <- train(artmap, normalize(trainCirSquare$x), trainCirSquare$dummyClasses)
 plot(artmap, .data = normalize(trainCirSquare$x), classes = trainCirSquare$dummyClasses, dummyCodeMap = dummyMap) # create the 2 dimensional plot of the data and the weights
 p <- predict(artmap, .data = normalize(testCirSquare$x), target = testCirSquare$dummyClasses)
 sum(p$matched, na.rm = T)/length(p$matched) * 100 # percent correct
@@ -106,19 +111,20 @@ sum(p$matched, na.rm = T)/length(p$matched) * 100 # percent correct
 The standard ARTMAP is better suited for regression problems^2^. Below is an example that uses the standard Fuzzy ARTMAP to approximate a sinusoidal function:
 
 ```{r}
+library(ggplot2)
 x = seq(0, 1, by = 0.001)
 y <- (sin(2*pi*x))^2
 fn <- cbind(x = x, y = y) # function to be approximated
-s <- sample(nrow(fn)) # randomize rows
-s_train <- fn[s,]
 a <- ARTMAP(dimension = 1, simplified = FALSE)
 a$module$b$rho <- 0.95 # The degree of approximation is determined by the vigilance parameter in ART b.
-train(a, as.matrix(s_train[,1]), s_train[,2])
+u <- as.matrix(fn[,1])
+colnames(u) <- "x"
+a <- train(a, u, fn[,2])
 # get the fit
-result <- predict(a, as.matrix(s_train[,1])) 
-z <- cbind(s_train[,1], result$predicted)
+result <- predict(a, as.matrix(u)) 
+z <- cbind(fn[,1], result$predicted)
 ggplot(data.frame(x = z[,1],y = z[,2])) + geom_line(aes(x = x, y = y), color = "red") +
-  geom_line(data = data.frame(x = s_train[,1], y = s_train[,2]), aes(x = x,y = y))
+  geom_line(data = data.frame(x = fn[,1], y = fn[,2]), aes(x = x,y = y))
 
 ```
 
@@ -133,8 +139,9 @@ Here is an example of using TopoART to cluster a noisy smiley face. Notice the s
 ```{r, fig.width = 7, fig.height = 4}
 # smiley face
 data(noisySmiley)
+colnames(noisySmiley) <- c("x", "y")
 topoart <- TopoART(rule = "fuzzy", dimension = 2, vigilance = 0.78, tau = 200, phi = 6)
-train(topoart, noisySmiley)
+topoart <- train(topoart, noisySmiley)
 plot(topoart, id = 0, noisySmiley) # the ART a module
 plot(topoart, id = 1, noisySmiley) # the ART b module
 ```
