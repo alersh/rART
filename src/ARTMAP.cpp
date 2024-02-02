@@ -503,9 +503,6 @@ namespace ARTMAP {
           resonance = true;
         }
         else {
-          // raise the vigilance of a and continue with the search
-          rho_a = std::min( m + ART::getEpsilon( module_a ), 1.0 );
-          
           // if it runs out of categories, then it can't find a match
           if ( j == ART::getNumCategories( module_a ) - 1 ){
             ART::setJmax( module_a, NA_INTEGER );
